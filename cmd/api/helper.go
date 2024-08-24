@@ -3,9 +3,12 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
+	"io"
 	"log"
 	"net/http"
 
+	"github.com/esousacosta/managementsystem/internal/data"
 	_ "github.com/lib/pq"
 )
 
@@ -53,4 +56,25 @@ func writeJson(w http.ResponseWriter, statusCode int, data envelope, headers htt
 	w.Write(json)
 
 	return nil
+}
+
+func readJson(w http.ResponseWriter, r *http.Request, logger *log.Logger) (*data.Part, error) {
+	maxBytes := 1_048_576
+	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
+
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+
+	var input data.Part
+	if err := dec.Decode(&input); err != nil {
+		logger.Printf("decoding error --> %v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return nil, err
+	}
+
+	if err := dec.Decode(&struct{}{}); err != io.EOF {
+		return nil, errors.New("body must contain only one JSON object")
+	}
+
+	return &input, nil
 }
