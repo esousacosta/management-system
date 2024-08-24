@@ -17,3 +17,7 @@ type part struct {
 type PartModel struct {
 	db *sql.DB
 }
+
+func (partModel *PartModel) GetAll() {
+
+}

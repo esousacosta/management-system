@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/esousacosta/managementsystem/internal/data"
 )
 
 type config struct {
@@ -18,6 +20,7 @@ type config struct {
 type application struct {
 	config config
 	logger *log.Logger
+	model  *data.Models
 }
 
 func main() {
@@ -27,9 +30,14 @@ func main() {
 	flag.StringVar(&cfg.dsn, "dsn", os.Getenv("MANAGEMENT_SYSTEM_DB_DSN"), "PostgreSQL DSN")
 	flag.Parse()
 
+	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+
+	db := getDbConnection(&cfg.dsn, logger)
+
 	app := &application{
 		config: cfg,
 		logger: log.New(os.Stdout, "", log.Ldate|log.Ltime),
+		model:  data.NewModel(db),
 	}
 
 	addr := fmt.Sprintf(":%d", app.config.port)
