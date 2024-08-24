@@ -9,7 +9,7 @@ type part struct {
 	Id        string    `json:"id"`
 	CreatedAt time.Time `json:"-"`
 	Name      string    `json:"name"`
-	Price     string    `json:"price"`
+	Price     float32   `json:"price"`
 	Stock     int64     `json:"stock"`
 	Reference string    `json:"reference"`
 }
