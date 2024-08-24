@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/esousacosta/managementsystem/internal/data"
 )
 
 func (app *application) healthcheck(w http.ResponseWriter, r *http.Request) {
@@ -41,6 +43,21 @@ func (app *application) getCreatePartsHandler(w http.ResponseWriter, r *http.Req
 		err := dec.Decode(&input)
 		if err != nil {
 			app.logger.Printf("decoding error --> %v", err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		part := data.Part{
+			Name:      input.Name,
+			Price:     input.Price,
+			Stock:     input.Stock,
+			Reference: input.Reference,
+			BarCode:   input.BarCode,
+		}
+
+		err = app.model.Parts.Insert(&part)
+		if err != nil {
+			app.logger.Printf("insertion error --> %v", err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}

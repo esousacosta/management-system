@@ -5,8 +5,8 @@ import (
 	"time"
 )
 
-type part struct {
-	Id        int       `json:"id"`
+type Part struct {
+	Id        int       `json:"-"`
 	CreatedAt time.Time `json:"-"`
 	Name      string    `json:"name"`
 	Price     float32   `json:"price"`
@@ -19,10 +19,10 @@ type PartModel struct {
 	db *sql.DB
 }
 type PartsReponse struct {
-	Parts []*part `json:"parts"`
+	Parts []*Part `json:"parts"`
 }
 
-func (partModel *PartModel) GetAll() ([]*part, error) {
+func (partModel *PartModel) GetAll() ([]*Part, error) {
 	query := `SELECT *
 	FROM parts
 	ORDER BY id;`
@@ -34,10 +34,10 @@ func (partModel *PartModel) GetAll() ([]*part, error) {
 
 	defer rows.Close()
 
-	var parts []*part
+	var parts []*Part
 
 	for rows.Next() {
-		var p part
+		var p Part
 		err = rows.Scan(&p.Id, &p.CreatedAt, &p.Name, &p.Price, &p.Stock, &p.Reference, &p.BarCode)
 		if err != nil {
 			return nil, err
@@ -50,4 +50,15 @@ func (partModel *PartModel) GetAll() ([]*part, error) {
 	}
 
 	return parts, err
+}
+
+func (partModel *PartModel) Insert(part *Part) error {
+	query := `INSERT INTO parts (name, price, stock, reference, barcode)
+				VALUES ($1, $2, $3, $4, $5)
+				RETURNING id, created_at`
+
+	// interface{} === any
+	args := []interface{}{part.Name, part.Price, part.Stock, part.Reference, part.BarCode}
+
+	return partModel.db.QueryRow(query, args...).Scan(&part.Id, &part.CreatedAt)
 }
