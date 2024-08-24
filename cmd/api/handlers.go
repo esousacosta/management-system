@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 )
 
 func (app *application) healthcheck(w http.ResponseWriter, r *http.Request) {
@@ -19,19 +20,32 @@ func (app *application) getCreatePartsHandler(w http.ResponseWriter, r *http.Req
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
-		json, err := json.MarshalIndent(map[string]any{"books": books}, "", "\t")
+
+		err = writeJson(w, http.StatusOK, envelope{"books": books}, nil)
 		if err != nil {
 			app.logger.Print(err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write(json)
-		// fmt.Fprintf(w, "books: %v", map[string]any{"books": books})
 	case r.Method == http.MethodPost:
-		fmt.Fprintf(w, "Create new book")
+		var input struct {
+			Id        int       `json:"-"`
+			CreatedAt time.Time `json:"-"`
+			Name      string    `json:"name"`
+			Price     float32   `json:"price"`
+			Stock     int64     `json:"stock"`
+			Reference string    `json:"reference"`
+			BarCode   string    `json:"barcode"`
+		}
+		dec := json.NewDecoder(r.Body)
+		err := dec.Decode(&input)
+		if err != nil {
+			app.logger.Printf("decoding error --> %v", err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Fprintf(w, "Create new book: %v", input)
 	default:
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 	}

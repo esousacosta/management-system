@@ -6,7 +6,7 @@ import (
 )
 
 type part struct {
-	Id        string    `json:"id"`
+	Id        int       `json:"id"`
 	CreatedAt time.Time `json:"-"`
 	Name      string    `json:"name"`
 	Price     float32   `json:"price"`
@@ -19,7 +19,7 @@ type PartModel struct {
 	db *sql.DB
 }
 type PartsReponse struct {
-	Parts *[]part `json:"parts"`
+	Parts []*part `json:"parts"`
 }
 
 func (partModel *PartModel) GetAll() ([]*part, error) {
