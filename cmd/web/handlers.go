@@ -6,7 +6,7 @@ import (
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome to the Simplex management system")
+	fmt.Fprintf(w, "Welcome to the Simplex management system!")
 }
 
 func (app *application) viewPart(w http.ResponseWriter, r *http.Request) {

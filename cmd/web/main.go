@@ -13,7 +13,7 @@ type application struct {
 }
 
 func main() {
-	addr := flag.String("addr", ":80", "HTTP network address")
+	addr := flag.String("addr", "localhost:3000", "HTTP network address")
 	endpoint := flag.String("endpoint", "http://localhost:4000/v1/parts", "Endpoint for accessing the management system web service")
 
 	app := application{managSysModel: appmodel.NewManagementSystemModel(*endpoint)}

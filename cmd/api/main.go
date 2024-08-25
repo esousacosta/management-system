@@ -40,7 +40,7 @@ func main() {
 		model:  data.NewModel(db),
 	}
 
-	addr := fmt.Sprintf(":%d", app.config.port)
+	addr := fmt.Sprintf("localhost:%d", app.config.port)
 
 	srv := http.Server{
 		Addr:         addr,
