@@ -5,6 +5,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+
+	"github.com/esousacosta/managementsystem/cmd/shared"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -42,6 +44,9 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) viewPart(w http.ResponseWriter, r *http.Request) {
+	ref := shared.GetPartReferenceFromUrl("/part/view/", r)
+	fmt.Println(*ref)
+	// app.managSysModel.getPart()
 	fmt.Fprintf(w, "View of a single part")
 }
 

@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+
+	"github.com/esousacosta/managementsystem/cmd/shared"
 )
 
 func (app *application) healthcheck(w http.ResponseWriter, r *http.Request) {
@@ -69,7 +71,7 @@ func (app *application) getUpdateDeletePartsHandler(w http.ResponseWriter, r *ht
 }
 
 func (app *application) getPart(w http.ResponseWriter, r *http.Request) {
-	ref := getPartReferenceFromUrl("/v1/parts/", r)
+	ref := shared.GetPartReferenceFromUrl("/v1/parts/", r)
 	part, err := app.model.Parts.GetByRef(*ref)
 	if err != nil {
 		app.logger.Printf("[ERROR] - %v", err)
@@ -85,7 +87,7 @@ func (app *application) getPart(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) updatePart(w http.ResponseWriter, r *http.Request) {
-	ref := getPartReferenceFromUrl("/v1/parts/", r)
+	ref := shared.GetPartReferenceFromUrl("/v1/parts/", r)
 	part, err := app.model.Parts.GetByRef(*ref)
 	if err != nil {
 		app.logger.Printf("[ERROR] - %v", err)
@@ -132,7 +134,7 @@ func (app *application) updatePart(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) deletePart(w http.ResponseWriter, r *http.Request) {
-	ref := getPartReferenceFromUrl("/v1/parts/", r)
+	ref := shared.GetPartReferenceFromUrl("/v1/parts/", r)
 	err := app.model.Parts.Delete(*ref)
 	if err != nil {
 		switch {
