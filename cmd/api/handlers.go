@@ -12,6 +12,8 @@ func (app *application) healthcheck(w http.ResponseWriter, r *http.Request) {
 func (app *application) getCreatePartsHandler(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case r.Method == http.MethodGet:
+		ref := r.URL.Query().Get("ref")
+		app.logger.Printf("Retrieved ref: %s", ref)
 		parts, err := app.model.Parts.GetAll()
 		if err != nil {
 			app.logger.Print(err)
