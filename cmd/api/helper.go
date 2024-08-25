@@ -58,14 +58,14 @@ func writeJson(w http.ResponseWriter, statusCode int, data envelope, headers htt
 	return nil
 }
 
-func readJson(w http.ResponseWriter, r *http.Request, logger *log.Logger) (*data.Part, error) {
+func readJson(w http.ResponseWriter, r *http.Request, logger *log.Logger) (*data.ReadPart, error) {
 	maxBytes := 1_048_576
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
 
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
 
-	var input data.Part
+	var input data.ReadPart
 	if err := dec.Decode(&input); err != nil {
 		logger.Printf("decoding error --> %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

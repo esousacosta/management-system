@@ -28,10 +28,9 @@ func (app *application) getCreatePartsHandler(w http.ResponseWriter, r *http.Req
 			return
 		}
 	case r.Method == http.MethodPost:
-
 		part, err := readJson(w, r, app.logger)
 		if err != nil {
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 			return
 		}
 
@@ -60,7 +59,7 @@ func (app *application) getUpdateDeletePartsHandler(w http.ResponseWriter, r *ht
 	case r.Method == http.MethodGet:
 		app.getPart(w, r)
 	case r.Method == http.MethodPut:
-		fmt.Fprintf(w, "Update a part")
+		app.updatePart(w, r)
 	case r.Method == http.MethodDelete:
 		fmt.Fprintf(w, "Delete a part")
 	default:
@@ -72,8 +71,8 @@ func (app *application) getPart(w http.ResponseWriter, r *http.Request) {
 	ref := getPartReferenceFromUrl("/v1/parts/", r)
 	part, err := app.model.Parts.GetByRef(*ref)
 	if err != nil {
-		app.logger.Println(err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		app.logger.Printf("[ERROR] - %v", err)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
 
@@ -82,4 +81,51 @@ func (app *application) getPart(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
+}
+
+func (app *application) updatePart(w http.ResponseWriter, r *http.Request) {
+	ref := getPartReferenceFromUrl("/v1/parts/", r)
+	part, err := app.model.Parts.GetByRef(*ref)
+	if err != nil {
+		app.logger.Printf("[ERROR] - %v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	receivedPart, err := readJson(w, r, app.logger)
+	if err != nil {
+		app.logger.Println(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	if receivedPart.Name != nil {
+		part.Name = *receivedPart.Name
+	}
+
+	if receivedPart.Price != nil {
+		part.Price = *receivedPart.Price
+	}
+
+	if receivedPart.Reference != nil {
+		part.Reference = *receivedPart.Reference
+	}
+
+	if receivedPart.BarCode != nil {
+		part.BarCode = *receivedPart.BarCode
+	}
+
+	err = app.model.Parts.Update(part)
+	if err != nil {
+		app.logger.Printf("[ERROR] - %v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	if err := writeJson(w, http.StatusOK, envelope{"updated part": part}, nil); err != nil {
+		app.logger.Println(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	app.logger.Printf("Part with reference %s successfully updated", *ref)
 }
