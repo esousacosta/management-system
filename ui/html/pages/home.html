@@ -7,5 +7,12 @@ Simplex homepage
    <div>
     This is the homepage of the website
    </div> 
+   {{if .}}
+   <ul>
+      {{range .}}
+      <li>{{.Name}}</li>
+      {{end}}
+   </ul>
+   {{end}}
 </article>
 {{end}}

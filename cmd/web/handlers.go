@@ -18,6 +18,14 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		"../../ui/html/pages/home.html",
 		"../../ui/html/partials/nav.html",
 	}
+
+	parts, err := app.managSysModel.GetAll()
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
 		log.Print(err.Error())
@@ -25,7 +33,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = ts.ExecuteTemplate(w, "base", nil)
+	err = ts.ExecuteTemplate(w, "base", parts)
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
