@@ -52,6 +52,38 @@ func (partModel *PartModel) GetAll() ([]*Part, error) {
 	return parts, err
 }
 
+func (partModel *PartModel) GetById(id int64) (*Part, error) {
+	query := `SELECT * FROM parts
+				WHERE id = $1`
+
+	row := partModel.db.QueryRow(query, id)
+
+	var part Part
+
+	err := row.Scan(&part.Id, &part.CreatedAt, &part.Name, &part.Price, &part.Stock, &part.Reference, &part.BarCode)
+	if err != nil {
+		return nil, err
+	}
+
+	return &part, nil
+}
+
+func (partModel *PartModel) GetByRef(ref string) (*Part, error) {
+	query := `SELECT * FROM parts
+				WHERE reference = $1`
+
+	row := partModel.db.QueryRow(query, ref)
+
+	var part Part
+
+	err := row.Scan(&part.Id, &part.CreatedAt, &part.Name, &part.Price, &part.Stock, &part.Reference, &part.BarCode)
+	if err != nil {
+		return nil, err
+	}
+
+	return &part, nil
+}
+
 func (partModel *PartModel) Insert(part *Part) error {
 	query := `INSERT INTO parts (name, price, stock, reference, barcode)
 				VALUES ($1, $2, $3, $4, $5)

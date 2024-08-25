@@ -78,3 +78,8 @@ func readJson(w http.ResponseWriter, r *http.Request, logger *log.Logger) (*data
 
 	return &input, nil
 }
+
+func getPartReferenceFromUrl(url string, r *http.Request) *string {
+	ref := r.URL.Path[len(url):]
+	return &ref
+}

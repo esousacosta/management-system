@@ -56,12 +56,28 @@ func (app *application) getCreatePartsHandler(w http.ResponseWriter, r *http.Req
 func (app *application) getUpdateDeletePartsHandler(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case r.Method == http.MethodGet:
-		fmt.Fprintf(w, "Get a single part")
+		app.getPart(w, r)
 	case r.Method == http.MethodPut:
 		fmt.Fprintf(w, "Update a part")
 	case r.Method == http.MethodDelete:
 		fmt.Fprintf(w, "Delete a part")
 	default:
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+	}
+}
+
+func (app *application) getPart(w http.ResponseWriter, r *http.Request) {
+	ref := getPartReferenceFromUrl("/v1/parts/", r)
+	part, err := app.model.Parts.GetByRef(*ref)
+	if err != nil {
+		app.logger.Println(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	if err := writeJson(w, http.StatusOK, envelope{"part": part}, nil); err != nil {
+		app.logger.Println(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
 	}
 }
