@@ -4,15 +4,16 @@ Simplex homepage
 
 {{define "main"}}
 <article>
-   <div>
-    This is the homepage of the website
-   </div> 
    {{if .}}
    <ul>
       {{range .}}
       <li>{{.Name}}</li>
       {{end}}
    </ul>
+   {{else}}
+   <div>
+    This is the homepage of the website
+   </div> 
    {{end}}
 </article>
 {{end}}
