@@ -14,7 +14,7 @@ type Part struct {
 	Price     float32   `json:"price"`
 	Stock     int64     `json:"stock"`
 	Reference string    `json:"reference"`
-	BarCode   string    `json:"barcode"`
+	Barcode   string    `json:"barcode"`
 }
 
 type ReadPart struct {
@@ -24,7 +24,7 @@ type ReadPart struct {
 	Price     *float32  `json:"price"`
 	Stock     *int64    `json:"stock"`
 	Reference *string   `json:"reference"`
-	BarCode   *string   `json:"barcode"`
+	Barcode   *string   `json:"barcode"`
 }
 
 type PartModel struct {
@@ -50,7 +50,7 @@ func (partModel *PartModel) GetAll() ([]*Part, error) {
 
 	for rows.Next() {
 		var p Part
-		err = rows.Scan(&p.Id, &p.CreatedAt, &p.Name, &p.Price, &p.Stock, &p.Reference, &p.BarCode)
+		err = rows.Scan(&p.Id, &p.CreatedAt, &p.Name, &p.Price, &p.Stock, &p.Reference, &p.Barcode)
 		if err != nil {
 			return nil, err
 		}
@@ -72,7 +72,7 @@ func (partModel *PartModel) GetById(id int64) (*Part, error) {
 
 	var part Part
 
-	err := row.Scan(&part.Id, &part.CreatedAt, &part.Name, &part.Price, &part.Stock, &part.Reference, &part.BarCode)
+	err := row.Scan(&part.Id, &part.CreatedAt, &part.Name, &part.Price, &part.Stock, &part.Reference, &part.Barcode)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func (partModel *PartModel) GetByRef(ref string) (*Part, error) {
 
 	var part Part
 
-	err := row.Scan(&part.Id, &part.CreatedAt, &part.Name, &part.Price, &part.Stock, &part.Reference, &part.BarCode)
+	err := row.Scan(&part.Id, &part.CreatedAt, &part.Name, &part.Price, &part.Stock, &part.Reference, &part.Barcode)
 	if err != nil {
 		return nil, errors.New("part with requested reference not found")
 	}
@@ -102,7 +102,7 @@ func (partModel *PartModel) Insert(part *ReadPart) error {
 				RETURNING id, created_at`
 
 	// interface{} === any
-	args := []interface{}{part.Name, part.Price, part.Stock, part.Reference, part.BarCode}
+	args := []interface{}{part.Name, part.Price, part.Stock, part.Reference, part.Barcode}
 
 	return partModel.db.QueryRow(query, args...).Scan(&part.Id, &part.CreatedAt)
 }
@@ -117,7 +117,7 @@ func (partModel *PartModel) Update(part *Part) error {
 				WHERE reference = $6
 				RETURNING name`
 
-	args := []any{part.Name, part.Price, part.Stock, part.Reference, part.BarCode, part.Reference}
+	args := []any{part.Name, part.Price, part.Stock, part.Reference, part.Barcode, part.Reference}
 	_, err := partModel.db.Exec(query, args...)
 	return err
 }

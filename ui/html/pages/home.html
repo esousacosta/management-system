@@ -5,15 +5,30 @@ Simplex homepage
 {{define "main"}}
 <article>
    {{if .}}
-   <ul>
-      {{range .}}
-      <li>{{.Name}}</li>
-      {{end}}
-   </ul>
+   <table class="parts-table">
+      <thead>
+         <th>Nome</th>
+         <th>Preco (R$)</th>
+         <th>Estoque (un.)</th>
+         <th>Referencia</th>
+         <th>Codigo de barras</th>
+      </thead>
+      <tbody>
+         {{range .}}
+         <tr>
+            <td>{{.Name}}</td>
+            <td>{{.Price}}</td>
+            <td>{{.Stock}}</td>
+            <td>{{.Reference}}</td>
+            <td>{{.Barcode}}</td>
+         </tr>
+         {{end}}
+      </tbody>
+   </table>
    {{else}}
    <div>
-    This is the homepage of the website
-   </div> 
+      This is the homepage of the website
+   </div>
    {{end}}
 </article>
 {{end}}

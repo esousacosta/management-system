@@ -112,8 +112,8 @@ func (app *application) updatePart(w http.ResponseWriter, r *http.Request) {
 		part.Reference = *receivedPart.Reference
 	}
 
-	if receivedPart.BarCode != nil {
-		part.BarCode = *receivedPart.BarCode
+	if receivedPart.Barcode != nil {
+		part.Barcode = *receivedPart.Barcode
 	}
 
 	err = app.model.Parts.Update(part)
