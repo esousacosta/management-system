@@ -3,6 +3,7 @@ package data
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -119,4 +120,28 @@ func (partModel *PartModel) Update(part *Part) error {
 	args := []any{part.Name, part.Price, part.Stock, part.Reference, part.BarCode, part.Reference}
 	_, err := partModel.db.Exec(query, args...)
 	return err
+}
+
+func (partModel *PartModel) Delete(ref string) error {
+	if ref == "" {
+		return fmt.Errorf("no part found with ref %s", ref)
+	}
+
+	query := `DELETE FROM parts
+				WHERE reference = $1`
+
+	results, err := partModel.db.Exec(query, ref)
+	if err != nil {
+		return err
+	}
+
+	deletedRows, err := results.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if deletedRows == 0 {
+		return fmt.Errorf("no part found with ref %s", ref)
+	}
+
+	return nil
 }

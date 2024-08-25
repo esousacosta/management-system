@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 )
@@ -61,7 +62,7 @@ func (app *application) getUpdateDeletePartsHandler(w http.ResponseWriter, r *ht
 	case r.Method == http.MethodPut:
 		app.updatePart(w, r)
 	case r.Method == http.MethodDelete:
-		fmt.Fprintf(w, "Delete a part")
+		app.deletePart(w, r)
 	default:
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 	}
@@ -127,5 +128,29 @@ func (app *application) updatePart(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	app.logger.Printf("Part with reference %s successfully updated", *ref)
+	app.logger.Printf("Part with reference %s updated", *ref)
+}
+
+func (app *application) deletePart(w http.ResponseWriter, r *http.Request) {
+	ref := getPartReferenceFromUrl("/v1/parts/", r)
+	err := app.model.Parts.Delete(*ref)
+	if err != nil {
+		switch {
+		case errors.Is(err, fmt.Errorf("no part found with ref %s", *ref)):
+			app.logger.Printf("[ERROR] - %v", err)
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
+		default:
+			app.logger.Printf("[ERROR] - %v", err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	if err := writeJson(w, http.StatusOK, envelope{"message": fmt.Sprintf("part with reference %s deleted", *ref)}, nil); err != nil {
+		app.logger.Println(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	app.logger.Printf("Part with reference %s deleted", *ref)
 }
