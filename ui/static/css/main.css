@@ -1,0 +1,16 @@
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+}
+
+h1 {
+    color: red;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
