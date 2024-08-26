@@ -5,8 +5,10 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/esousacosta/managementsystem/cmd/shared"
+	"github.com/esousacosta/managementsystem/internal/data"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +76,19 @@ func (app *application) viewPart(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *application) createPart(w http.ResponseWriter, _ *http.Request) {
+func (app *application) createPart(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		app.createPartForm(w, r)
+	case http.MethodPost:
+		app.createPartProcess(w, r)
+	default:
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
+}
+
+func (app *application) createPartForm(w http.ResponseWriter, _ *http.Request) {
 	files := []string{
 		"./../../ui/html/base.html",
 		"./../../ui/html/partials/nav.html",
@@ -94,5 +108,57 @@ func (app *application) createPart(w http.ResponseWriter, _ *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	// fmt.Fprintf(w, "Creation form for a single part")
+}
+
+func (app *application) createPartProcess(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	name := r.PostFormValue("name")
+	if name == "" {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	priceFloat, err := strconv.ParseFloat(r.PostFormValue("price"), 32)
+	if err != nil || priceFloat < 0 {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	price := float32(priceFloat)
+
+	stock, err := strconv.ParseInt(r.PostForm.Get("stock"), 10, 64)
+	if err != nil || stock < 0 {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	reference := r.PostFormValue("reference")
+	if reference == "" {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	barcode := r.PostFormValue("barcode")
+	if barcode == "" {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	part := data.Part{
+		Name:      name,
+		Price:     price,
+		Stock:     stock,
+		Reference: reference,
+		Barcode:   barcode,
+	}
+
+	app.managSysModel.InsertPart(&part)
+
+	fmt.Printf("Parsed form: %v", r.Form)
 }
