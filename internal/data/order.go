@@ -15,6 +15,7 @@ type Order struct {
 	CreatedAt time.Time `json:"-"`
 	Services  []string  `json:"services"`
 	PartsIds  []int     `json:"partsids"`
+	Comment   string    `json:"comment"`
 	Total     float32   `json:"total"`
 }
 
