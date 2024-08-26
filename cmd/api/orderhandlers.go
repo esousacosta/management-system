@@ -8,6 +8,11 @@ import (
 func (app *application) getCreateOrdersHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
+		_, err := app.model.Orders.GetAll()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 		fmt.Fprintln(w, "Get all orders")
 		return
 	case http.MethodPost:
