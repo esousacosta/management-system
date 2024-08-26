@@ -14,7 +14,7 @@ body {
 }
 
 h1 {
-    color: red;
+    color:rgb(3, 6, 98);
 }
 
 a {
@@ -50,7 +50,21 @@ a {
 }
 
 .parts-table > tbody > tr:nth-child(odd) {
-    background-color: red;
+    background-color:rgb(167, 208, 244);
+}
+
+.parts-table > tbody td {
+    padding: 0 1em;
+    text-align: center;
+}
+
+/* single part page */
+.part-attr {
+    list-style-type: none;
+}
+
+.part-attr > span {
+    font-weight: bold;
 }
 
 /* footer section */

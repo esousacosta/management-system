@@ -1,0 +1,17 @@
+{{define "title"}}Single part view{{end}}
+
+{{define "main"}}
+<div class="single-part">
+    {{if .}}
+<ul class="part-attrs">
+    <li class="part-attr"><span>Nome:</span> {{.Name}}</li>
+    <li class="part-attr"><span>Preco:</span> {{.Price}}</li>
+    <li class="part-attr"><span>Estoque:</span> {{.Stock}}</li>
+    <li class="part-attr"><span>Referencia:</span> {{.Reference}}</li>
+    <li class="part-attr"><span>Codigo de barras:</span> {{.Barcode}}</li>
+</ul>
+    {{else}}
+    <p>Part not found</p>
+    {{end}}
+</div>
+{{end}}

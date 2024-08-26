@@ -53,7 +53,25 @@ func (app *application) viewPart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "View of a single part: %v", *part)
+	files := []string{
+		"./../../ui/html/base.html",
+		"./../../ui/html/partials/nav.html",
+		"./../../ui/html/pages/view.html",
+	}
+
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	err = ts.ExecuteTemplate(w, "base", *part)
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
 }
 
 func (app *application) createPart(w http.ResponseWriter, r *http.Request) {
