@@ -150,7 +150,7 @@ func (app *application) createPartProcess(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	part := data.Part{
+	part := &data.Part{
 		Name:      name,
 		Price:     price,
 		Stock:     stock,
@@ -158,7 +158,12 @@ func (app *application) createPartProcess(w http.ResponseWriter, r *http.Request
 		Barcode:   barcode,
 	}
 
-	app.managSysModel.InsertPart(&part)
+	errorCode := app.managSysModel.PostPart(part)
+	if errorCode != http.StatusCreated {
+		http.Error(w, http.StatusText(int(errorCode)), int(errorCode))
+		return
+	}
 
-	fmt.Printf("Parsed form: %v", r.Form)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+	// fmt.Printf("Parsed form: %v", r.Form)
 }
