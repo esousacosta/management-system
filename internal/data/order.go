@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	"github.com/lib/pq"
 )
 
 type OrderModel struct {
@@ -15,7 +17,7 @@ type Order struct {
 	ClientId  string    `json:"client_id"`
 	CreatedAt time.Time `json:"-"`
 	Services  []string  `json:"services"`
-	PartsIds  []int     `json:"parts_ids"`
+	PartsIds  []int64   `json:"parts_ids"`
 	Comment   string    `json:"comment"`
 	Total     float32   `json:"total"`
 }
@@ -37,11 +39,15 @@ func (om *OrderModel) GetAll() ([]*Order, error) {
 
 	for rows.Next() {
 		var order Order
-		if err := rows.Scan(&order.ID, &order.ClientId, &order.PartsIds, &order.PartsIds, &order.PartsIds, &order.Comment, &order.Total); err != nil {
+		// the drive.Value, the thing Scan uses to read values,
+		// doesn't parse int slices - hence the need for the hack below.
+		var partsIdsArr pq.Int64Array
+		if err := rows.Scan(&order.ClientId, &order.CreatedAt, pq.Array(order.Services), &partsIdsArr, &order.Comment, &order.Total, &order.ID); err != nil {
 			fmt.Print("scan error: ")
 			return nil, err
 		}
-		fmt.Printf("%v", order)
+		order.PartsIds = []int64(partsIdsArr)
+		fmt.Printf("%+v", order)
 		orders = append(orders, &order)
 	}
 
