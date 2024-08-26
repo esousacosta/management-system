@@ -46,8 +46,14 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 func (app *application) viewPart(w http.ResponseWriter, r *http.Request) {
 	ref := shared.GetPartReferenceFromUrl("/part/view/", r)
 	fmt.Println(*ref)
-	// app.managSysModel.getPart()
-	fmt.Fprintf(w, "View of a single part")
+	part, err := app.managSysModel.GetPart(*ref)
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, "View of a single part: %v", *part)
 }
 
 func (app *application) createPart(w http.ResponseWriter, r *http.Request) {
