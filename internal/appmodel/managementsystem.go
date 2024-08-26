@@ -89,7 +89,7 @@ func (managSysMoel *ManagementSystemModel) PostPart(part *data.Part) errorCode {
 	client := &http.Client{}
 	data, err := json.Marshal(part)
 	if err != nil {
-		return err
+		return http.StatusBadRequest
 	}
 
 	req, err := http.NewRequest("POST", managSysMoel.Endpoint, bytes.NewBuffer(data))

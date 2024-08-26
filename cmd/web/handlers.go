@@ -165,5 +165,4 @@ func (app *application) createPartProcess(w http.ResponseWriter, r *http.Request
 	}
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
-	// fmt.Printf("Parsed form: %v", r.Form)
 }
