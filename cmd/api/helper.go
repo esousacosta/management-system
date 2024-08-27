@@ -58,7 +58,7 @@ func writeJson(w http.ResponseWriter, statusCode int, data envelope, headers htt
 	return nil
 }
 
-func readJson(w http.ResponseWriter, r *http.Request, logger *log.Logger) (*data.ReadPart, error) {
+func readPartJson(w http.ResponseWriter, r *http.Request, logger *log.Logger) (*data.ReadPart, error) {
 	maxBytes := 1_048_576
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
 
@@ -66,6 +66,27 @@ func readJson(w http.ResponseWriter, r *http.Request, logger *log.Logger) (*data
 	dec.DisallowUnknownFields()
 
 	var input data.ReadPart
+	if err := dec.Decode(&input); err != nil {
+		logger.Printf("decoding error --> %v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return nil, err
+	}
+
+	if err := dec.Decode(&struct{}{}); err != io.EOF {
+		return nil, errors.New("body must contain only one JSON object")
+	}
+
+	return &input, nil
+}
+
+func readOrderJson(w http.ResponseWriter, r *http.Request, logger *log.Logger) (*data.Order, error) {
+	maxBytes := 1_048_576
+	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
+
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+
+	var input data.Order
 	if err := dec.Decode(&input); err != nil {
 		logger.Printf("decoding error --> %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

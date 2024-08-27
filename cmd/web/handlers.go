@@ -18,9 +18,9 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	}
 
 	files := []string{
-		"../../ui/html/base.html",
-		"../../ui/html/pages/home.html",
-		"../../ui/html/partials/nav.html",
+		"./ui/html/base.html",
+		"./ui/html/pages/home.html",
+		"./ui/html/partials/nav.html",
 	}
 
 	parts, err := app.managSysModel.GetAll()
@@ -56,9 +56,9 @@ func (app *application) viewPart(w http.ResponseWriter, r *http.Request) {
 	}
 
 	files := []string{
-		"./../../ui/html/base.html",
-		"./../../ui/html/partials/nav.html",
-		"./../../ui/html/pages/view.html",
+		"./ui/html/base.html",
+		"./ui/html/partials/nav.html",
+		"./ui/html/pages/view.html",
 	}
 
 	ts, err := template.ParseFiles(files...)
@@ -90,9 +90,9 @@ func (app *application) createPart(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) createPartForm(w http.ResponseWriter, _ *http.Request) {
 	files := []string{
-		"./../../ui/html/base.html",
-		"./../../ui/html/partials/nav.html",
-		"./../../ui/html/pages/create.html",
+		"./ui/html/base.html",
+		"./ui/html/partials/nav.html",
+		"./ui/html/pages/create.html",
 	}
 
 	ts, err := template.ParseFiles(files...)

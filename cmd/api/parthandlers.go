@@ -31,7 +31,7 @@ func (app *application) getCreatePartsHandler(w http.ResponseWriter, r *http.Req
 			return
 		}
 	case r.Method == http.MethodPost:
-		part, err := readJson(w, r, app.logger)
+		part, err := readPartJson(w, r, app.logger)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 			return
@@ -95,7 +95,7 @@ func (app *application) updatePart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	receivedPart, err := readJson(w, r, app.logger)
+	receivedPart, err := readPartJson(w, r, app.logger)
 	if err != nil {
 		app.logger.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

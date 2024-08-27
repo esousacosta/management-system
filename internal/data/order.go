@@ -22,6 +22,16 @@ type Order struct {
 	Total     float32   `json:"total"`
 }
 
+type ReadOrder struct {
+	ID        int       `json:"-"`
+	ClientId  *string   `json:"client_id"`
+	CreatedAt time.Time `json:"-"`
+	Services  *[]string `json:"services"`
+	PartsIds  *[]int64  `json:"parts_ids"`
+	Comment   *string   `json:"comment"`
+	Total     *float32  `json:"total"`
+}
+
 func (om *OrderModel) GetAll() ([]*Order, error) {
 	query := `SELECT *
 			FROM orders
