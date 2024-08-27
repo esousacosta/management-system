@@ -46,7 +46,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) viewPart(w http.ResponseWriter, r *http.Request) {
-	ref := shared.GetPartReferenceFromUrl("/part/view/", r)
+	ref := shared.GetUniqueIdentifierFromUrl("/part/view/", r)
 	fmt.Println(*ref)
 	part, err := app.managSysModel.GetPart(*ref)
 	if err != nil {

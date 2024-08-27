@@ -79,31 +79,23 @@ func (om *OrderModel) Insert(orderToInsert *Order) error {
 	}
 
 	return nil
-	// if err != nil {
-	// 	fmt.Print("query error: ")
-	// 	return err
-	// }
-
-	// defer rows.Close()
-
-	// var orders []*Order
-
-	// for rows.Next() {
-	// 	var order Order
-	// 	// the drive.Value, the thing Scan uses to read values,
-	// 	// doesn't parse int slices - hence the need for the hack below.
-	// 	var partsIdsArr pq.Int64Array
-	// 	if err := rows.Scan(&order.ID, &order.ClientId, &order.CreatedAt, pq.Array(order.Services), &partsIdsArr, &order.Comment, &order.Total); err != nil {
-	// 		fmt.Print("scan error: ")
-	// 		return err
-	// 	}
-	// 	order.PartsIds = []int64(partsIdsArr)
-	// 	fmt.Printf("%+v", order)
-	// 	orders = append(orders, &order)
-	// }
-
-	// return nil
 }
 
-// func (orderModel *OrderModel) GetAll() []*Order {
-// }
+func (om *OrderModel) Get(orderId int64) (*Order, error) {
+	query := `SELECT *
+			FROM orders
+			WHERE id = $1`
+
+	var order Order
+
+	var partsIdsArr pq.Int64Array
+	err := om.db.QueryRow(query, orderId).Scan(&order.ID, &order.ClientId, &order.CreatedAt, pq.Array(&order.Services), &partsIdsArr, &order.Comment, &order.Total)
+	if err != nil {
+		fmt.Printf("query error: %v", err)
+		return nil, err
+	}
+
+	order.PartsIds = []int64(partsIdsArr)
+
+	return &order, nil
+}

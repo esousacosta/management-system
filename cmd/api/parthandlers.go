@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/esousacosta/managementsystem/cmd/shared"
 )
@@ -46,7 +47,7 @@ func (app *application) getCreatePartsHandler(w http.ResponseWriter, r *http.Req
 		}
 
 		headers := make(http.Header)
-		headers.Set("Location", fmt.Sprintf("/v1/parts/%d", part.Id))
+		headers.Set("Location", "/v1/parts/"+strconv.Itoa(part.Id))
 
 		if err := writeJson(w, http.StatusCreated, envelope{"part": part}, headers); err != nil {
 			app.logger.Printf("response writing error --> %v", err)
@@ -72,7 +73,7 @@ func (app *application) getUpdateDeletePartsHandler(w http.ResponseWriter, r *ht
 }
 
 func (app *application) getPart(w http.ResponseWriter, r *http.Request) {
-	ref := shared.GetPartReferenceFromUrl("/v1/parts/", r)
+	ref := shared.GetUniqueIdentifierFromUrl("/v1/parts/", r)
 	part, err := app.model.Parts.GetByRef(*ref)
 	if err != nil {
 		app.logger.Printf("[ERROR] - %v", err)
@@ -88,7 +89,7 @@ func (app *application) getPart(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) updatePart(w http.ResponseWriter, r *http.Request) {
-	ref := shared.GetPartReferenceFromUrl("/v1/parts/", r)
+	ref := shared.GetUniqueIdentifierFromUrl("/v1/parts/", r)
 	part, err := app.model.Parts.GetByRef(*ref)
 	if err != nil {
 		app.logger.Printf("[ERROR] - %v", err)
@@ -135,7 +136,7 @@ func (app *application) updatePart(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) deletePart(w http.ResponseWriter, r *http.Request) {
-	ref := shared.GetPartReferenceFromUrl("/v1/parts/", r)
+	ref := shared.GetUniqueIdentifierFromUrl("/v1/parts/", r)
 	err := app.model.Parts.Delete(*ref)
 	if err != nil {
 		switch {

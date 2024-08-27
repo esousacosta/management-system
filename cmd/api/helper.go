@@ -53,9 +53,9 @@ func writeJson(w http.ResponseWriter, statusCode int, data envelope, headers htt
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	w.Write(json)
+	_, err = w.Write(json)
 
-	return nil
+	return err
 }
 
 func readPartJson(w http.ResponseWriter, r *http.Request, logger *log.Logger) (*data.ReadPart, error) {

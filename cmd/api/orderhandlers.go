@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strconv"
+
+	"github.com/esousacosta/managementsystem/cmd/shared"
 )
 
 func (app *application) getCreateOrdersHandler(w http.ResponseWriter, r *http.Request) {
@@ -29,8 +32,19 @@ func (app *application) getCreateOrdersHandler(w http.ResponseWriter, r *http.Re
 			return
 		}
 
-		app.model.Orders.Insert(order)
-		fmt.Fprintf(w, "%+v", order)
+		err = app.model.Orders.Insert(order)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		header := make(http.Header)
+		header.Set("Location", "/v1/orders/"+strconv.Itoa(order.ID))
+		if err := writeJson(w, http.StatusCreated, envelope{"order": order}, header); err != nil {
+			app.logger.Print(err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
 		return
 	default:
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
@@ -41,7 +55,25 @@ func (app *application) getCreateOrdersHandler(w http.ResponseWriter, r *http.Re
 func (app *application) getUpdateDeleteOrdersHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		fmt.Fprintln(w, "Get a single order")
+		idStr := shared.GetUniqueIdentifierFromUrl("/v1/orders/", r)
+		id, err := strconv.ParseInt(*idStr, 10, 64)
+		if err != nil {
+			app.logger.Print(err)
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
+
+		order, err := app.model.Orders.Get(id)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		if err := writeJson(w, http.StatusOK, envelope{"order": *order}, nil); err != nil {
+			app.logger.Printf("error sending the response: %v", err)
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
 		return
 	case http.MethodPut:
 		fmt.Fprintln(w, "Update a single order")
