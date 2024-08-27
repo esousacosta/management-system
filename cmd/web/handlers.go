@@ -113,7 +113,7 @@ func (app *application) createPartForm(w http.ResponseWriter, _ *http.Request) {
 func (app *application) createPartProcess(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("create part form parsing error --> %v", err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}

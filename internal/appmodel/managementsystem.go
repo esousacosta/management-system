@@ -89,6 +89,7 @@ func (managSysMoel *ManagementSystemModel) PostPart(part *data.Part) errorCode {
 	client := &http.Client{}
 	data, err := json.Marshal(part)
 	if err != nil {
+		log.Print(err)
 		return http.StatusBadRequest
 	}
 
@@ -107,8 +108,8 @@ func (managSysMoel *ManagementSystemModel) PostPart(part *data.Part) errorCode {
 
 	resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		log.Print(err)
+	if resp.StatusCode != http.StatusCreated {
+		log.Printf("unexpected status from insertion received: %s", http.StatusText(resp.StatusCode))
 		return http.StatusInternalServerError
 	}
 

@@ -33,6 +33,7 @@ func (app *application) getCreatePartsHandler(w http.ResponseWriter, r *http.Req
 	case r.Method == http.MethodPost:
 		part, err := readPartJson(w, r, app.logger)
 		if err != nil {
+			app.logger.Printf("request decoding error --> %v", err)
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 			return
 		}
@@ -48,7 +49,7 @@ func (app *application) getCreatePartsHandler(w http.ResponseWriter, r *http.Req
 		headers.Set("Location", fmt.Sprintf("/v1/parts/%d", part.Id))
 
 		if err := writeJson(w, http.StatusCreated, envelope{"part": part}, headers); err != nil {
-			app.logger.Printf("db writing error --> %v", err)
+			app.logger.Printf("response writing error --> %v", err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
