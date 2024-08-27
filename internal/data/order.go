@@ -2,7 +2,6 @@ package data
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"time"
 
@@ -40,7 +39,7 @@ func (om *OrderModel) GetAll() ([]*Order, error) {
 
 	rows, err := om.db.Query(query)
 	if err != nil {
-		fmt.Print("query error: ")
+		log.Print("query error: ")
 		return nil, err
 	}
 
@@ -54,11 +53,10 @@ func (om *OrderModel) GetAll() ([]*Order, error) {
 		// doesn't parse int slices - hence the need for the hack below.
 		var partsIdsArr pq.Int64Array
 		if err := rows.Scan(&order.ID, &order.ClientId, &order.CreatedAt, pq.Array(order.Services), &partsIdsArr, &order.Comment, &order.Total); err != nil {
-			fmt.Print("scan error: ")
+			log.Print("scan error: ")
 			return nil, err
 		}
 		order.PartsIds = []int64(partsIdsArr)
-		fmt.Printf("%+v", order)
 		orders = append(orders, &order)
 	}
 
@@ -75,7 +73,7 @@ func (om *OrderModel) Get(orderId int64) (*Order, error) {
 	var partsIdsArr pq.Int64Array
 	err := om.db.QueryRow(query, orderId).Scan(&order.ID, &order.ClientId, &order.CreatedAt, pq.Array(&order.Services), &partsIdsArr, &order.Comment, &order.Total)
 	if err != nil {
-		fmt.Printf("query error: %v", err)
+		log.Printf("query error: %v", err)
 		return nil, err
 	}
 
