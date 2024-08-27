@@ -42,7 +42,7 @@ func (om *OrderModel) GetAll() ([]*Order, error) {
 		// the drive.Value, the thing Scan uses to read values,
 		// doesn't parse int slices - hence the need for the hack below.
 		var partsIdsArr pq.Int64Array
-		if err := rows.Scan(&order.ClientId, &order.CreatedAt, pq.Array(order.Services), &partsIdsArr, &order.Comment, &order.Total, &order.ID); err != nil {
+		if err := rows.Scan(&order.ID, &order.ClientId, &order.CreatedAt, pq.Array(order.Services), &partsIdsArr, &order.Comment, &order.Total); err != nil {
 			fmt.Print("scan error: ")
 			return nil, err
 		}
