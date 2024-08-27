@@ -79,14 +79,14 @@ func readPartJson(w http.ResponseWriter, r *http.Request, logger *log.Logger) (*
 	return &input, nil
 }
 
-func readOrderJson(w http.ResponseWriter, r *http.Request, logger *log.Logger) (*data.Order, error) {
+func readOrderJson(w http.ResponseWriter, r *http.Request, logger *log.Logger) (*data.ReadOrder, error) {
 	maxBytes := 1_048_576
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
 
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
 
-	var input data.Order
+	var input data.ReadOrder
 	if err := dec.Decode(&input); err != nil {
 		logger.Printf("decoding error --> %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
