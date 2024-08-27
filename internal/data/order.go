@@ -65,22 +65,6 @@ func (om *OrderModel) GetAll() ([]*Order, error) {
 	return orders, nil
 }
 
-func (om *OrderModel) Insert(orderToInsert *ReadOrder) error {
-	query := `INSERT INTO orders (client_id, services, parts_ids, comment, total)
-			VALUES ($1, $2, $3, $4, $5)
-			RETURNING id, created_at`
-
-	args := []any{orderToInsert.ClientId, pq.Array(orderToInsert.Services), pq.Int64Array(*orderToInsert.PartsIds), orderToInsert.Comment, orderToInsert.Total}
-
-	err := om.db.QueryRow(query, args...).Scan(&orderToInsert.ID, &orderToInsert.CreatedAt)
-	if err != nil {
-		log.Printf("insert query error --> %v", err.Error())
-		return err
-	}
-
-	return nil
-}
-
 func (om *OrderModel) Get(orderId int64) (*Order, error) {
 	query := `SELECT *
 			FROM orders
@@ -98,6 +82,22 @@ func (om *OrderModel) Get(orderId int64) (*Order, error) {
 	order.PartsIds = []int64(partsIdsArr)
 
 	return &order, nil
+}
+
+func (om *OrderModel) Insert(orderToInsert *ReadOrder) error {
+	query := `INSERT INTO orders (client_id, services, parts_ids, comment, total)
+			VALUES ($1, $2, $3, $4, $5)
+			RETURNING id, created_at`
+
+	args := []any{orderToInsert.ClientId, pq.Array(orderToInsert.Services), pq.Int64Array(*orderToInsert.PartsIds), orderToInsert.Comment, orderToInsert.Total}
+
+	err := om.db.QueryRow(query, args...).Scan(&orderToInsert.ID, &orderToInsert.CreatedAt)
+	if err != nil {
+		log.Printf("insert query error --> %v", err.Error())
+		return err
+	}
+
+	return nil
 }
 
 func (om *OrderModel) Update(order *Order) error {
@@ -119,6 +119,24 @@ func (om *OrderModel) Update(order *Order) error {
 
 	if nbRowsAffected, err := result.RowsAffected(); nbRowsAffected == 0 || err != nil {
 		log.Printf("no orders updated for id %d", order.ID)
+		return err
+	}
+
+	return nil
+}
+
+func (om *OrderModel) Delete(orderId int64) error {
+	query := `DELETE FROM orders
+				WHERE id = $1`
+
+	result, err := om.db.Exec(query, orderId)
+	if err != nil {
+		log.Printf("error updating entry in orders db: %v", err)
+		return err
+	}
+
+	if nbRowsAffected, err := result.RowsAffected(); nbRowsAffected == 0 || err != nil {
+		log.Printf("no orders delete for id %d", orderId)
 		return err
 	}
 

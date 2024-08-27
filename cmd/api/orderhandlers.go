@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -129,7 +128,27 @@ func (app *application) getUpdateDeleteOrdersHandler(w http.ResponseWriter, r *h
 		}
 		app.logger.Printf("Order with reference %s updated", *idStr)
 	case http.MethodDelete:
-		fmt.Fprintln(w, "Delete a single order")
+		idStr := shared.GetUniqueIdentifierFromUrl("/v1/orders/", r)
+		id, err := strconv.ParseInt(*idStr, 10, 64)
+		if err != nil {
+			app.logger.Print(err)
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
+		err = app.model.Orders.Delete(id)
+		if err != nil {
+			app.logger.Print(err)
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
+
+		err = writeJson(w, http.StatusOK, envelope{"order with id %s deleted": id}, nil)
+		if err != nil {
+			app.logger.Printf("error writing response from server: %v", err)
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
+		app.logger.Printf("Deleted order with id %d", id)
 	default:
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 	}
