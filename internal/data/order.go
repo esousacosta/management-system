@@ -3,6 +3,7 @@ package data
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/lib/pq"
@@ -62,6 +63,46 @@ func (om *OrderModel) GetAll() ([]*Order, error) {
 	}
 
 	return orders, nil
+}
+
+func (om *OrderModel) Insert(orderToInsert *Order) error {
+	query := `INSERT INTO orders (client_id, services, parts_ids, comment, total)
+			VALUES ($1, $2, $3, $4, $5)
+			RETURNING id, created_at`
+
+	args := []any{orderToInsert.ClientId, pq.Array(orderToInsert.Services), pq.Int64Array(orderToInsert.PartsIds), orderToInsert.Comment, orderToInsert.Total}
+
+	err := om.db.QueryRow(query, args...).Scan(&orderToInsert.ID, &orderToInsert.CreatedAt)
+	if err != nil {
+		log.Printf("insert query error --> %v", err.Error())
+		return err
+	}
+
+	return nil
+	// if err != nil {
+	// 	fmt.Print("query error: ")
+	// 	return err
+	// }
+
+	// defer rows.Close()
+
+	// var orders []*Order
+
+	// for rows.Next() {
+	// 	var order Order
+	// 	// the drive.Value, the thing Scan uses to read values,
+	// 	// doesn't parse int slices - hence the need for the hack below.
+	// 	var partsIdsArr pq.Int64Array
+	// 	if err := rows.Scan(&order.ID, &order.ClientId, &order.CreatedAt, pq.Array(order.Services), &partsIdsArr, &order.Comment, &order.Total); err != nil {
+	// 		fmt.Print("scan error: ")
+	// 		return err
+	// 	}
+	// 	order.PartsIds = []int64(partsIdsArr)
+	// 	fmt.Printf("%+v", order)
+	// 	orders = append(orders, &order)
+	// }
+
+	// return nil
 }
 
 // func (orderModel *OrderModel) GetAll() []*Order {

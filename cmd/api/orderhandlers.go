@@ -29,7 +29,7 @@ func (app *application) getCreateOrdersHandler(w http.ResponseWriter, r *http.Re
 			return
 		}
 
-		// app.model.Orders.Insert(order)
+		app.model.Orders.Insert(order)
 		fmt.Fprintf(w, "%+v", order)
 		return
 	default:
