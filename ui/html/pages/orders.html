@@ -3,12 +3,12 @@
 {{define "main"}}
 <article>
    {{if .}}
-   <table class="orders-table">
+   <table class="parts-table">
       <thead>
          <th>ID Cliente</th>
          <th>Data</th>
          <th>Serviços</th>
-         <th>IDs Peças</th>
+         <th>Peças</th>
          <th>Comentário</th>
          <th>Total (R$)</th>
       </thead>
@@ -21,7 +21,7 @@
                 <p>{{.}}</p>
                 {{end}}
             </td>
-            <td>{{range .PartsIds}}
+            <td>{{range .PartsRefs}}
                 <span><a href="/part/view/{{.}}">{{.}}</a></span>
                 {{end}}
             </td>

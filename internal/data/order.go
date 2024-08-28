@@ -15,9 +15,9 @@ type OrderModel struct {
 type Order struct {
 	ID        int       `json:"-"`
 	ClientId  string    `json:"client_id"`
-	CreatedAt time.Time `json:"-"`
+	CreatedAt time.Time `json:"created_at"`
 	Services  []string  `json:"services"`
-	PartsIds  []int64   `json:"parts_ids"`
+	PartsRefs []string  `json:"parts_refs"`
 	Comment   string    `json:"comment"`
 	Total     float32   `json:"total"`
 }
@@ -25,9 +25,9 @@ type Order struct {
 type ReadOrder struct {
 	ID        int       `json:"-"`
 	ClientId  *string   `json:"client_id"`
-	CreatedAt time.Time `json:"-"`
+	CreatedAt time.Time `json:"created_at"`
 	Services  *[]string `json:"services"`
-	PartsIds  *[]int64  `json:"parts_ids"`
+	PartsRefs *[]string `json:"parts_refs"`
 	Comment   *string   `json:"comment"`
 	Total     *float32  `json:"total"`
 }
@@ -49,14 +49,10 @@ func (om *OrderModel) GetAll() ([]*Order, error) {
 
 	for rows.Next() {
 		var order Order
-		// the drive.Value, the thing Scan uses to read values,
-		// doesn't parse int slices - hence the need for the hack below.
-		var partsIdsArr pq.Int64Array
-		if err := rows.Scan(&order.ID, &order.ClientId, &order.CreatedAt, pq.Array(order.Services), &partsIdsArr, &order.Comment, &order.Total); err != nil {
+		if err := rows.Scan(&order.ID, &order.ClientId, &order.CreatedAt, pq.Array(&order.Services), pq.Array(&order.PartsRefs), &order.Comment, &order.Total); err != nil {
 			log.Print("scan error: ")
 			return nil, err
 		}
-		order.PartsIds = []int64(partsIdsArr)
 		orders = append(orders, &order)
 	}
 
@@ -70,24 +66,21 @@ func (om *OrderModel) Get(orderId int64) (*Order, error) {
 
 	var order Order
 
-	var partsIdsArr pq.Int64Array
-	err := om.db.QueryRow(query, orderId).Scan(&order.ID, &order.ClientId, &order.CreatedAt, pq.Array(&order.Services), &partsIdsArr, &order.Comment, &order.Total)
+	err := om.db.QueryRow(query, orderId).Scan(&order.ID, &order.ClientId, &order.CreatedAt, pq.Array(&order.Services), pq.Array(&order.PartsRefs), &order.Comment, &order.Total)
 	if err != nil {
 		log.Printf("query error: %v", err)
 		return nil, err
 	}
 
-	order.PartsIds = []int64(partsIdsArr)
-
 	return &order, nil
 }
 
 func (om *OrderModel) Insert(orderToInsert *ReadOrder) error {
-	query := `INSERT INTO orders (client_id, services, parts_ids, comment, total)
+	query := `INSERT INTO orders (client_id, services, parts_refs, comment, total)
 			VALUES ($1, $2, $3, $4, $5)
 			RETURNING id, created_at`
 
-	args := []any{orderToInsert.ClientId, pq.Array(orderToInsert.Services), pq.Int64Array(*orderToInsert.PartsIds), orderToInsert.Comment, orderToInsert.Total}
+	args := []any{orderToInsert.ClientId, pq.Array(orderToInsert.Services), pq.Array(orderToInsert.PartsRefs), orderToInsert.Comment, orderToInsert.Total}
 
 	err := om.db.QueryRow(query, args...).Scan(&orderToInsert.ID, &orderToInsert.CreatedAt)
 	if err != nil {
@@ -102,13 +95,13 @@ func (om *OrderModel) Update(order *Order) error {
 	query := `UPDATE orders SET
 				client_id = $1,
 				services = $2,
-				parts_ids = $3,
+				parts_refs = $3,
 				comment = $4,
 				total = $5
 				WHERE id = $6
 				RETURNING client_id`
 
-	args := []any{order.ClientId, pq.Array(&order.Services), pq.Int64Array(order.PartsIds), order.Comment, order.Total, order.ID}
+	args := []any{order.ClientId, pq.Array(&order.Services), pq.Array(order.PartsRefs), order.Comment, order.Total, order.ID}
 	result, err := om.db.Exec(query, args...)
 	if err != nil {
 		log.Printf("error updating entry in orders db: %v", err)

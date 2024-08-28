@@ -103,8 +103,8 @@ func (app *application) getUpdateDeleteOrdersHandler(w http.ResponseWriter, r *h
 			order.Services = *receivedOrder.Services
 		}
 
-		if receivedOrder.PartsIds != nil {
-			order.PartsIds = *receivedOrder.PartsIds
+		if receivedOrder.PartsRefs != nil {
+			order.PartsRefs = *receivedOrder.PartsRefs
 		}
 
 		if receivedOrder.Comment != nil {
