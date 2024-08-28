@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/esousacosta/managementsystem/cmd/shared"
 	"github.com/esousacosta/managementsystem/internal/data"
@@ -30,13 +31,16 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ts, err := template.ParseFiles(files...)
+	funcMap := template.FuncMap{
+		"timeFormatting": func() string { return time.DateTime },
+	}
+
+	ts, err := template.New("base").Funcs(funcMap).ParseFiles(files...)
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-
 	err = ts.ExecuteTemplate(w, "base", orders)
 	if err != nil {
 		log.Print(err.Error())

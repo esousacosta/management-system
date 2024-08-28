@@ -15,8 +15,8 @@
       <tbody>
          {{range .}}
          <tr>
-            <td>{{.ClientId}}</a></td>
-            <td>{{.CreatedAt}}</a></td>
+            <td>{{.ClientId}}</td>
+            <td>{{.CreatedAt.Format timeFormatting}}</td>
             <td>{{range .Services}}
                 <p>{{.}}</p>
                 {{end}}
