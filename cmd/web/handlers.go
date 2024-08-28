@@ -19,11 +19,40 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 	files := []string{
 		"./ui/html/base.html",
-		"./ui/html/pages/home.html",
+		"./ui/html/pages/orders.html",
 		"./ui/html/partials/nav.html",
 	}
 
-	parts, err := app.managSysModel.GetAll()
+	orders, err := app.managSysModel.GetAllOrders()
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	err = ts.ExecuteTemplate(w, "base", orders)
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (app *application) partsView(w http.ResponseWriter, r *http.Request) {
+	files := []string{
+		"./ui/html/base.html",
+		"./ui/html/pages/parts.html",
+		"./ui/html/partials/nav.html",
+	}
+
+	parts, err := app.managSysModel.GetAllParts()
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

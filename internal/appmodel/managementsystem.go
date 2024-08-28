@@ -14,25 +14,31 @@ import (
 type errorCode int
 
 type ManagementSystemModel struct {
-	Endpoint string
+	PartsEndpoint  string
+	OrdersEndpoint string
 }
 
 type PartsResponse struct {
 	Parts []data.Part `json:"parts"`
 }
 
+type OrdersResponse struct {
+	Orders []data.Order `json:"orders"`
+}
+
 type PartResponse struct {
 	Parts data.Part `json:"part"`
 }
 
-func NewManagementSystemModel(endpoint string) ManagementSystemModel {
+func NewManagementSystemModel(ordersEndpoint string, partsEndpoint string) ManagementSystemModel {
 	return ManagementSystemModel{
-		Endpoint: endpoint,
+		PartsEndpoint:  partsEndpoint,
+		OrdersEndpoint: ordersEndpoint,
 	}
 }
 
-func (managSysModel *ManagementSystemModel) GetAll() (*[]data.Part, error) {
-	resp, err := http.Get(managSysModel.Endpoint)
+func (managSysModel *ManagementSystemModel) GetAllParts() (*[]data.Part, error) {
+	resp, err := http.Get(managSysModel.PartsEndpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +65,7 @@ func (managSysModel *ManagementSystemModel) GetAll() (*[]data.Part, error) {
 }
 
 func (managSysModel *ManagementSystemModel) GetPart(partRef string) (*data.Part, error) {
-	resp, err := http.Get(managSysModel.Endpoint + "/" + partRef)
+	resp, err := http.Get(managSysModel.PartsEndpoint + "/" + partRef)
 	if err != nil {
 		return nil, fmt.Errorf("part with reference %s not found", partRef)
 	}
@@ -93,7 +99,7 @@ func (managSysMoel *ManagementSystemModel) PostPart(part *data.Part) errorCode {
 		return http.StatusBadRequest
 	}
 
-	req, err := http.NewRequest("POST", managSysMoel.Endpoint, bytes.NewBuffer(data))
+	req, err := http.NewRequest("POST", managSysMoel.PartsEndpoint, bytes.NewBuffer(data))
 	if err != nil {
 		log.Print(err)
 		return http.StatusBadRequest
@@ -114,4 +120,31 @@ func (managSysMoel *ManagementSystemModel) PostPart(part *data.Part) errorCode {
 	}
 
 	return http.StatusCreated
+}
+
+func (managSysModel *ManagementSystemModel) GetAllOrders() (*[]data.Order, error) {
+	resp, err := http.Get(managSysModel.OrdersEndpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status: %s", resp.Status)
+	}
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var ordersResp OrdersResponse
+
+	err = json.Unmarshal(data, &ordersResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ordersResp.Orders, nil
 }

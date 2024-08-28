@@ -1,0 +1,40 @@
+{{define "title"}} Peças {{end}}
+
+{{define "main"}}
+<article>
+   {{if .}}
+   <table class="orders-table">
+      <thead>
+         <th>ID Cliente</th>
+         <th>Data</th>
+         <th>Serviços</th>
+         <th>IDs Peças</th>
+         <th>Comentário</th>
+         <th>Total (R$)</th>
+      </thead>
+      <tbody>
+         {{range .}}
+         <tr>
+            <td>{{.ClientId}}</a></td>
+            <td>{{.CreatedAt}}</a></td>
+            <td>{{range .Services}}
+                <p>{{.}}</p>
+                {{end}}
+            </td>
+            <td>{{range .PartsIds}}
+                <span><a href="/part/view/{{.}}">{{.}}</a></span>
+                {{end}}
+            </td>
+            <td>{{.Comment}}</td>
+            <td>{{.Total}}</td>
+         </tr>
+         {{end}}
+      </tbody>
+   </table>
+   {{else}}
+   <div>
+      This is the homepage of the website
+   </div>
+   {{end}}
+</article>
+{{end}}
