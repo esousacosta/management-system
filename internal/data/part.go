@@ -82,7 +82,7 @@ func (partModel *PartModel) GetById(id int64) (*Part, error) {
 
 func (partModel *PartModel) GetByRef(ref string) (*Part, error) {
 	query := `SELECT * FROM parts
-				WHERE reference = $1`
+				WHERE LOWER(reference) = LOWER($1)`
 
 	row := partModel.db.QueryRow(query, ref)
 
