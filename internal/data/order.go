@@ -75,6 +75,34 @@ func (om *OrderModel) Get(orderId int64) (*Order, error) {
 	return &order, nil
 }
 
+func (om *OrderModel) GetByClientId(clientId int64) ([]*Order, error) {
+	query := `SELECT *
+			FROM orders
+			WHERE client_id = $1`
+
+	rows, err := om.db.Query(query, clientId)
+	if err != nil {
+		log.Printf("query error: %v", err)
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var orders []*Order
+
+	for rows.Next() {
+		var order Order
+		err := rows.Scan(&order.ID, &order.ClientId, &order.CreatedAt, pq.Array(&order.Services), pq.Array(&order.PartsRefs), &order.Comment, &order.Total)
+		if err != nil {
+			log.Print("scan error: ")
+			return nil, err
+		}
+		orders = append(orders, &order)
+	}
+
+	return orders, nil
+}
+
 func (om *OrderModel) Insert(orderToInsert *ReadOrder) error {
 	query := `INSERT INTO orders (client_id, services, parts_refs, comment, total)
 			VALUES ($1, $2, $3, $4, $5)

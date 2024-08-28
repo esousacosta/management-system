@@ -54,6 +54,7 @@ func (app *application) getCreateOrdersHandler(w http.ResponseWriter, r *http.Re
 func (app *application) getUpdateDeleteOrdersHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
+		id := r.URL.Query().Get("clientid")
 		idStr := shared.GetUniqueIdentifierFromUrl("/v1/orders/", r)
 		id, err := strconv.ParseInt(*idStr, 10, 64)
 		if err != nil {

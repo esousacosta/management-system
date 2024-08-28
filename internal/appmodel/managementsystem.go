@@ -149,6 +149,33 @@ func (managSysModel *ManagementSystemModel) GetAllOrders() (*[]data.Order, error
 	return &ordersResp.Orders, nil
 }
 
+func (managSysModel *ManagementSystemModel) GetOrdersByClientId(clientId string) (*data.Part, error) {
+	resp, err := http.Get(managSysModel.PartsEndpoint + "/" + clientId)
+	if err != nil {
+		return nil, fmt.Errorf("part with reference %s not found", clientId)
+	}
+
+	defer resp.Body.Close()
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status received: %s", resp.Status)
+	}
+
+	var partResponse PartResponse
+
+	err = json.Unmarshal(data, &partResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return &partResponse.Parts, nil
+}
+
 func (managSysMoel *ManagementSystemModel) PostOrder(order *data.Order) errorCode {
 	client := &http.Client{}
 	data, err := json.Marshal(order)

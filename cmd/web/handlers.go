@@ -99,9 +99,9 @@ func (app *application) createOrderProcess(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	getFormArrayValueAsSlice := func(r *http.Request, key string) ([]string, error) {
+	getFormArrayValueAsSlice := func(r *http.Request, cannotBeNull bool, key string) ([]string, error) {
 		formValue := r.PostFormValue(key)
-		if formValue == "" {
+		if cannotBeNull && formValue == "" {
 			log.Printf("%s form reading error", key)
 			return nil, fmt.Errorf("empty form field %s", key)
 		}
@@ -113,13 +113,13 @@ func (app *application) createOrderProcess(w http.ResponseWriter, r *http.Reques
 		return splitStrings, nil
 	}
 
-	services, err := getFormArrayValueAsSlice(r, "services")
+	services, err := getFormArrayValueAsSlice(r, false, "services")
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
 
-	partsRefs, err := getFormArrayValueAsSlice(r, "parts_refs")
+	partsRefs, err := getFormArrayValueAsSlice(r, false, "parts_refs")
 	if err != nil {
 		log.Printf("parts_refs form reading error")
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
@@ -127,11 +127,6 @@ func (app *application) createOrderProcess(w http.ResponseWriter, r *http.Reques
 	}
 
 	comment := r.PostFormValue("comment")
-	if comment == "" {
-		log.Printf("comment form reading error")
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-		return
-	}
 
 	totalFloat, err := strconv.ParseFloat(r.PostFormValue("total"), 32)
 	if err != nil || totalFloat < 0 {
@@ -263,12 +258,17 @@ func (app *application) createPartProcess(w http.ResponseWriter, r *http.Request
 
 	name := r.PostFormValue("name")
 	if name == "" {
+		log.Print("error reading name from the form")
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
 
 	priceFloat, err := strconv.ParseFloat(r.PostFormValue("price"), 32)
 	if err != nil || priceFloat < 0 {
+		log.Printf("error reading the price from the form")
+		if err != nil {
+			log.Print(err.Error())
+		}
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
@@ -277,21 +277,22 @@ func (app *application) createPartProcess(w http.ResponseWriter, r *http.Request
 
 	stock, err := strconv.ParseInt(r.PostForm.Get("stock"), 10, 64)
 	if err != nil || stock < 0 {
+		log.Printf("error reading the stock from the form")
+		if err != nil {
+			log.Print(err.Error())
+		}
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
 
 	reference := r.PostFormValue("reference")
 	if reference == "" {
+		log.Printf("the part reference cannot be empty")
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
 
 	barcode := r.PostFormValue("barcode")
-	if barcode == "" {
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-		return
-	}
 
 	part := &data.Part{
 		Name:      name,
