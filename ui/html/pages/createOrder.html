@@ -1,0 +1,20 @@
+{{define "title"}}Create new order{{end}}
+
+{{define "main"}}
+<div>Registre um nova nota</div>
+<form action="/order/create" method="post">
+   <label for="client_id">ID do Cliente</label>
+   <input type="text" id="client_id" name="client_id">
+   <label for="services">Serviços</label>
+   <input type="text" id="services" name="services">
+   <label for="parts_refs">Refs. Peças</label>
+   <input type="text" id="parts_refs" name="parts_refs">
+   <label for="comment">Observação</label>
+   <input type="text" id="comment" name="comment">
+   <label for="total">Total</label>
+   <input type="number" step="0.01" id="total" name="total">
+   <div class="button-center">
+      <button type="submit">registrar</button>
+   </div>
+</form>
+{{end}}
