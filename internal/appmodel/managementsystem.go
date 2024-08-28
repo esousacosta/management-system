@@ -148,3 +148,34 @@ func (managSysModel *ManagementSystemModel) GetAllOrders() (*[]data.Order, error
 
 	return &ordersResp.Orders, nil
 }
+
+func (managSysMoel *ManagementSystemModel) PostOrder(order *data.Order) errorCode {
+	client := &http.Client{}
+	data, err := json.Marshal(order)
+	if err != nil {
+		log.Print(err)
+		return http.StatusBadRequest
+	}
+
+	req, err := http.NewRequest("POST", managSysMoel.OrdersEndpoint, bytes.NewBuffer(data))
+	if err != nil {
+		log.Print(err)
+		return http.StatusBadRequest
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Print(err)
+		return http.StatusInternalServerError
+	}
+
+	resp.Body.Close()
+
+	if resp.StatusCode != http.StatusCreated {
+		log.Printf("unexpected status from insertion received: %s", http.StatusText(resp.StatusCode))
+		return http.StatusInternalServerError
+	}
+
+	return http.StatusCreated
+}

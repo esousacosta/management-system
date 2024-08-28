@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/esousacosta/managementsystem/cmd/shared"
@@ -47,6 +48,115 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
+}
+
+func (app *application) createOrder(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		app.createOrderForm(w, r)
+	case http.MethodPost:
+		app.createOrderProcess(w, r)
+	default:
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
+}
+
+func (app *application) createOrderForm(w http.ResponseWriter, _ *http.Request) {
+	files := []string{
+		"./ui/html/base.html",
+		"./ui/html/partials/nav.html",
+		"./ui/html/pages/createOrder.html",
+	}
+
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	err = ts.ExecuteTemplate(w, "base", nil)
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (app *application) createOrderProcess(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		log.Printf("create order form parsing error --> %v", err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	clientId := r.PostFormValue("client_id")
+	if clientId == "" {
+		log.Printf("client_id form reading error")
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	getFormArrayValueAsSlice := func(r *http.Request, key string) ([]string, error) {
+		formValue := r.PostFormValue(key)
+		if formValue == "" {
+			log.Printf("%s form reading error", key)
+			return nil, fmt.Errorf("empty form field %s", key)
+		}
+		splitStrings := strings.Split(formValue, ",")
+		for i, splitStr := range splitStrings {
+			splitStrings[i] = strings.TrimSpace(splitStr)
+		}
+
+		return splitStrings, nil
+	}
+
+	services, err := getFormArrayValueAsSlice(r, "services")
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	partsRefs, err := getFormArrayValueAsSlice(r, "parts_refs")
+	if err != nil {
+		log.Printf("parts_refs form reading error")
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	comment := r.PostFormValue("comment")
+	if comment == "" {
+		log.Printf("comment form reading error")
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	totalFloat, err := strconv.ParseFloat(r.PostFormValue("total"), 32)
+	if err != nil || totalFloat < 0 {
+		log.Printf("total form reading error")
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	total := float32(totalFloat)
+
+	order := &data.Order{
+		ClientId:  clientId,
+		Services:  services,
+		PartsRefs: partsRefs,
+		Comment:   comment,
+		Total:     total,
+	}
+
+	errorCode := app.managSysModel.PostOrder(order)
+	if errorCode != http.StatusCreated {
+		http.Error(w, http.StatusText(int(errorCode)), int(errorCode))
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (app *application) partsView(w http.ResponseWriter, r *http.Request) {
@@ -125,7 +235,7 @@ func (app *application) createPartForm(w http.ResponseWriter, _ *http.Request) {
 	files := []string{
 		"./ui/html/base.html",
 		"./ui/html/partials/nav.html",
-		"./ui/html/pages/create.html",
+		"./ui/html/pages/createPart.html",
 	}
 
 	ts, err := template.ParseFiles(files...)
