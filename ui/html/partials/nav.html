@@ -1,9 +1,13 @@
 {{define "nav"}}
 <nav class="navbar">
     <ul class="navbar-opts">
-        <form action="/orders/" method="post"></form>
-        <label for="order-search">Buscar nota</label>
-        <input type="text" id="order-search" name="order-search">
+        <form action="/orders/search" method="GET">
+            <label for="clientid">Buscar nota</label>
+            <input type="text" id="clientid" name="clientid">
+            <div class="button-center">
+                <button type="submit">buscar</button>
+            </div>
+        </form>
         <li class="navbar-opt"><a href="/">Home</a></li>
         <li class="navbar-opt"><a href="/order/create">Registrar nova nota</a></li>
         <li class="navbar-opt"><a href="/parts">Peças</a></li>

@@ -54,7 +54,7 @@ func (app *application) getCreateOrdersHandler(w http.ResponseWriter, r *http.Re
 func (app *application) getUpdateDeleteOrdersHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		id := r.URL.Query().Get("clientid")
+		app.logger.Print("[START] Handling GET request on /v1/orders/")
 		idStr := shared.GetUniqueIdentifierFromUrl("/v1/orders/", r)
 		id, err := strconv.ParseInt(*idStr, 10, 64)
 		if err != nil {
@@ -150,6 +150,34 @@ func (app *application) getUpdateDeleteOrdersHandler(w http.ResponseWriter, r *h
 			return
 		}
 		app.logger.Printf("Deleted order with id %d", id)
+	default:
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+	}
+}
+
+func (app *application) getFilteredOrdersHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		app.logger.Print("[START] Handling GET request on /v1/orders/search")
+		clientId := r.URL.Query().Get("clientid")
+		if clientId == "" {
+			app.logger.Print("empty request clientid")
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
+
+		orders, err := app.model.Orders.GetByClientId(clientId)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		if err := writeJson(w, http.StatusOK, envelope{"orders": orders}, nil); err != nil {
+			app.logger.Printf("error sending the response: %v", err)
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
+		return
 	default:
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 	}

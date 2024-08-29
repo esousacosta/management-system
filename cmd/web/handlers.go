@@ -50,6 +50,52 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (app *application) filteredOrdersView(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		log.Printf("error parsing form: %v", err)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	clientId := r.FormValue("clientid")
+	if clientId == "" {
+		log.Print("error reading client ID from the form")
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	files := []string{
+		"./ui/html/base.html",
+		"./ui/html/pages/orders.html",
+		"./ui/html/partials/nav.html",
+	}
+
+	orders, err := app.managSysModel.GetOrdersByClientId(clientId)
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	funcMap := template.FuncMap{
+		"timeFormatting": func() string { return time.DateTime },
+	}
+
+	ts, err := template.New("base").Funcs(funcMap).ParseFiles(files...)
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	err = ts.ExecuteTemplate(w, "base", orders)
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+}
+
 func (app *application) createOrder(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:

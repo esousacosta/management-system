@@ -149,10 +149,10 @@ func (managSysModel *ManagementSystemModel) GetAllOrders() (*[]data.Order, error
 	return &ordersResp.Orders, nil
 }
 
-func (managSysModel *ManagementSystemModel) GetOrdersByClientId(clientId string) (*data.Part, error) {
-	resp, err := http.Get(managSysModel.PartsEndpoint + "/" + clientId)
+func (managSysModel *ManagementSystemModel) GetOrdersByClientId(clientId string) ([]data.Order, error) {
+	resp, err := http.Get(managSysModel.OrdersEndpoint + "/search?clientid=" + clientId)
 	if err != nil {
-		return nil, fmt.Errorf("part with reference %s not found", clientId)
+		return nil, fmt.Errorf("order with client ID %s not found", clientId)
 	}
 
 	defer resp.Body.Close()
@@ -166,14 +166,14 @@ func (managSysModel *ManagementSystemModel) GetOrdersByClientId(clientId string)
 		return nil, fmt.Errorf("unexpected status received: %s", resp.Status)
 	}
 
-	var partResponse PartResponse
+	var ordersResponse OrdersResponse
 
-	err = json.Unmarshal(data, &partResponse)
+	err = json.Unmarshal(data, &ordersResponse)
 	if err != nil {
 		return nil, err
 	}
 
-	return &partResponse.Parts, nil
+	return ordersResponse.Orders, nil
 }
 
 func (managSysMoel *ManagementSystemModel) PostOrder(order *data.Order) errorCode {

@@ -75,7 +75,7 @@ func (om *OrderModel) Get(orderId int64) (*Order, error) {
 	return &order, nil
 }
 
-func (om *OrderModel) GetByClientId(clientId int64) ([]*Order, error) {
+func (om *OrderModel) GetByClientId(clientId string) ([]Order, error) {
 	query := `SELECT *
 			FROM orders
 			WHERE client_id = $1`
@@ -88,7 +88,7 @@ func (om *OrderModel) GetByClientId(clientId int64) ([]*Order, error) {
 
 	defer rows.Close()
 
-	var orders []*Order
+	var orders []Order
 
 	for rows.Next() {
 		var order Order
@@ -97,7 +97,7 @@ func (om *OrderModel) GetByClientId(clientId int64) ([]*Order, error) {
 			log.Print("scan error: ")
 			return nil, err
 		}
-		orders = append(orders, &order)
+		orders = append(orders, order)
 	}
 
 	return orders, nil
