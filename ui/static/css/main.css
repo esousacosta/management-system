@@ -22,6 +22,8 @@ a {
     color: inherit;
 }
 
+/* navbar */
+
 .navbar {
     display: flex;
     flex-direction: row;
@@ -38,6 +40,11 @@ a {
 
 .navbar-opt {
     list-style-type: none;
+}
+
+.order-search-form {
+    display: flex;
+    gap: 0.5em;
 }
 
 /* main table section */
