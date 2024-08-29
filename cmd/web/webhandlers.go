@@ -354,5 +354,5 @@ func (app *application) createPartProcess(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/parts", http.StatusSeeOther)
 }

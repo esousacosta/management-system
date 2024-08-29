@@ -4,13 +4,13 @@
 <div>Registre uma nova peça</div>
 <form action="/part/create" method="post">
    <label for="name">Nome</label>
-   <input type="text" id="name" name="name">
+   <input type="text" id="name" name="name" required>
    <label for="price">Preço</label>
-   <input type="number" step="0.01" min="0" id="price" name="price">
+   <input type="number" step="0.01" min="0" id="price" name="price" required>
    <label for="stock">Estoque</label>
    <input type="number" step="1" min="0" id="stock" name="stock">
    <label for="reference">Referencia</label>
-   <input type="text" id="reference" name="reference">
+   <input type="text" id="reference" name="reference" required>
    <label for="barcode">Codigo de barras</label>
    <input type="text" id="barcode" name="barcode">
    <div class="button-center">
