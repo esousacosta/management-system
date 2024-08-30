@@ -99,3 +99,24 @@ func readOrderJson(w http.ResponseWriter, r *http.Request, logger *log.Logger) (
 
 	return &input, nil
 }
+
+func readUserAuthJson(w http.ResponseWriter, r *http.Request, logger *log.Logger) (*data.ReadUserAuth, error) {
+	maxBytes := 1_048_576
+	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
+
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+
+	var input data.ReadUserAuth
+	if err := dec.Decode(&input); err != nil || input.Email == nil || input.Password == nil {
+		logger.Printf("decoding error --> %v", err)
+		http.Error(w, "user auth query decoding error", http.StatusInternalServerError)
+		return nil, err
+	}
+
+	if err := dec.Decode(&struct{}{}); err != io.EOF {
+		return nil, errors.New("body must contain only one JSON object")
+	}
+
+	return &input, nil
+}
