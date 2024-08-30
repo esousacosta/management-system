@@ -3,8 +3,9 @@ package data
 import "database/sql"
 
 type Models struct {
-	Parts  PartModel
-	Orders OrderModel
+	Parts     PartModel
+	Orders    OrderModel
+	UsersAuth UserAuthModel
 }
 
 func NewModel(db *sql.DB) *Models {
@@ -13,6 +14,9 @@ func NewModel(db *sql.DB) *Models {
 			db: db,
 		},
 		Orders: OrderModel{
+			db: db,
+		},
+		UsersAuth: UserAuthModel{
 			db: db,
 		},
 	}
