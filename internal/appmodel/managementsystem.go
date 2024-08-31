@@ -250,7 +250,7 @@ func (managSysMoel *ManagementSystemModel) RequestAuth(userAuth data.UserAuth) (
 		return false, http.StatusInternalServerError
 	}
 
-	log.Print(authResponse)
+	log.Printf("[%s] Authorized: %v", shared.GetCallerInfo(), authResponse.Authorized)
 
 	return authResponse.Authorized, http.StatusOK
 }

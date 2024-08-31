@@ -47,8 +47,6 @@ func (um *UserAuthModel) InsertUser(userAuth *ReadUserAuth) error {
 				RETURNING id, created_at`
 
 	args := []any{*userAuth.Email, *userAuth.Password}
-	log.Print(*userAuth.Email)
-	log.Print(*userAuth.Password)
 
 	err := um.db.QueryRow(query, args...).Scan(&userAuth.ID, &userAuth.CreatedAt)
 	if err != nil {
