@@ -1,8 +1,8 @@
 {{define "title"}}Create new order{{end}}
 
 {{define "main"}}
-<div>Registre um nova nota</div>
-<form action="/order/create" method="post">
+<h1>Registre um nova nota</h1>
+<form action="/order/create" method="post" class="create-form">
    <label for="client_id">ID do Cliente</label>
    <input type="text" id="client_id" name="client_id">
    <label for="services">Serviços</label>

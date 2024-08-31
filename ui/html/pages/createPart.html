@@ -1,8 +1,8 @@
 {{define "title"}}Create new part{{end}}
 
 {{define "main"}}
-<div>Registre uma nova peça</div>
-<form action="/part/create" method="post">
+<h1>Registre uma nova peça</h1>
+<form action="/part/create" method="post" class="create-form">
    <label for="name">Nome</label>
    <input type="text" id="name" name="name" required>
    <label for="price">Preço</label>
