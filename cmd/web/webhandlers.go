@@ -356,3 +356,39 @@ func (app *application) createPartProcess(w http.ResponseWriter, r *http.Request
 
 	http.Redirect(w, r, "/parts", http.StatusSeeOther)
 }
+
+func (app *application) loginHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		app.loginForm(w, r)
+	case http.MethodPost:
+		return
+	default:
+		http.Error(w, "The requested HTTP method is not allowed on this endpoint", http.StatusMethodNotAllowed)
+		return
+	}
+}
+
+func (app *application) loginForm(w http.ResponseWriter, _ *http.Request) {
+	files := []string{
+		"./ui/html/base.html",
+		"./ui/html/pages/login.html",
+		"./ui/html/partials/nav.html",
+	}
+
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	type htmlEnhancingData struct {
+		Centralized bool
+	}
+
+	err = ts.ExecuteTemplate(w, "base", htmlEnhancingData{Centralized: true})
+	if err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+}
