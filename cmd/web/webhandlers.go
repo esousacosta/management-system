@@ -416,13 +416,13 @@ func (app *application) loginProcess(w http.ResponseWriter, r *http.Request) {
 		Password: password,
 	}
 
-	authorized, errorCode := app.managSysModel.RequestAuth(userAuth)
+	authenticated, errorCode := app.managSysModel.RequestAuth(userAuth)
 	if errorCode != http.StatusOK {
 		http.Error(w, "Authentication failed: invalid user credentials", http.StatusUnauthorized)
 		return
 	}
 
-	if authorized {
+	if authenticated {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}

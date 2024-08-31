@@ -73,7 +73,7 @@ func (app *application) processUserAuth(w http.ResponseWriter, r *http.Request) 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(*userAuth.Password))
 	if err != nil {
 		app.logger.Print(err)
-		err := writeJson(w, http.StatusUnauthorized, envelope{"authorization": false}, nil)
+		err := writeJson(w, http.StatusUnauthorized, envelope{"authentication": false}, nil)
 		if err != nil {
 			http.Error(w, "error writing response", http.StatusInternalServerError)
 			return
@@ -81,7 +81,7 @@ func (app *application) processUserAuth(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err = writeJson(w, http.StatusOK, envelope{"authorized": true}, nil)
+	err = writeJson(w, http.StatusOK, envelope{"authenticated": true}, nil)
 	if err != nil {
 		http.Error(w, "error writing response", http.StatusInternalServerError)
 		return

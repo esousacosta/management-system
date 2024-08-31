@@ -33,7 +33,7 @@ type PartResponse struct {
 }
 
 type AuthResponse struct {
-	Authorized bool `json:"authorized"`
+	Authorized bool `json:"authenticated"`
 }
 
 func NewManagementSystemModel(ordersEndpoint string, partsEndpoint string, authEndpoint string) ManagementSystemModel {
