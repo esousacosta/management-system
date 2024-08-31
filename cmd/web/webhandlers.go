@@ -418,6 +418,7 @@ func (app *application) loginProcess(w http.ResponseWriter, r *http.Request) {
 
 	if authorized {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
 	}
 
 	http.Error(w, "invalid credentials", http.StatusUnauthorized)

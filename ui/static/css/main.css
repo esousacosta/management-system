@@ -84,13 +84,13 @@ footer {
 
 .centralized-container{
     margin: auto 0;
-    font-size: 2em;
 }
 
 .login-form {
     display: flex;
     flex-direction: column;
     gap: 0.5em;
+    font-size: 2em;
 }
 
 .login-form > * {
