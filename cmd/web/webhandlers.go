@@ -13,6 +13,10 @@ import (
 	"github.com/esousacosta/managementsystem/internal/data"
 )
 
+const (
+	itemsPerPage = 10
+)
+
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
@@ -34,6 +38,13 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 	funcMap := template.FuncMap{
 		"timeFormatting": func() string { return time.DateTime },
+		"seq": func(start, end int) []int {
+			seq := []int{}
+			for i := start; i <= end; i++ {
+				seq = append(seq, i)
+			}
+			return seq
+		},
 	}
 
 	ts, err := template.New("base").Funcs(funcMap).ParseFiles(files...)
@@ -42,7 +53,13 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	err = ts.ExecuteTemplate(w, "base", orders)
+
+	data := struct {
+		Orders     *[]data.Order
+		TotalPages int
+	}{Orders: orders, TotalPages: (len(*orders) + itemsPerPage - 1) / itemsPerPage}
+
+	err = ts.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

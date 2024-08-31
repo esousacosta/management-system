@@ -3,7 +3,7 @@
 {{define "main"}}
 <article>
    {{if .}}
-   <table class="parts-table">
+   <table class="orders-table">
       <thead>
          <th>ID Cliente</th>
          <th>Data</th>
@@ -13,7 +13,7 @@
          <th>Total (R$)</th>
       </thead>
       <tbody>
-         {{range .}}
+         {{range .Orders}}
          <tr>
             <td>{{.ClientId}}</td>
             <td>{{.CreatedAt.Format timeFormatting}}</td>
@@ -31,6 +31,11 @@
          {{end}}
       </tbody>
    </table>
+   <div class="pagination">
+      {{range $i := (seq 1 .TotalPages)}}
+      <a>{{$i}}</a>
+      {{end}}
+   </div>
    {{else}}
    <div>
       No orders to display

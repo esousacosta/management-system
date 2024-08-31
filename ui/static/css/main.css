@@ -63,13 +63,14 @@ a {
     font-size: 1rem;
 }
 
-/* main table section */
+/* parts table section */
 
 .parts-table {
     align-self: center;
     border: 1px solid gray;
     border-radius: 0.2em;
     padding: 0.2em;
+    font-size: 1.2em;
 }
 
 .parts-table > tbody > tr:nth-child(odd) {
@@ -79,6 +80,31 @@ a {
 .parts-table > tbody td {
     padding: 0 1em;
     text-align: center;
+}
+
+/* orders table section */
+
+.orders-table {
+    align-self: center;
+    border: 1px solid gray;
+    border-radius: 0.2em;
+    padding: 0.2em;
+    font-size: 1.2em;
+}
+
+.orders-table > tbody > tr:nth-child(odd) {
+    background-color:rgb(167, 208, 244);
+}
+
+.orders-table > tbody td {
+    padding: 0 1em;
+    text-align: center;
+}
+
+.pagination a {
+    margin: 0 5px;
+    text-decoration: none;
+    color: blue;
 }
 
 /* single part page */
