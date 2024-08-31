@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/esousacosta/managementsystem/cmd/shared"
 	"github.com/esousacosta/managementsystem/internal/data"
@@ -36,18 +35,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	funcMap := template.FuncMap{
-		"timeFormatting": func() string { return time.DateTime },
-		"seq": func(start, end int) []int {
-			seq := []int{}
-			for i := start; i <= end; i++ {
-				seq = append(seq, i)
-			}
-			return seq
-		},
-	}
-
-	ts, err := template.New("base").Funcs(funcMap).ParseFiles(files...)
+	ts, err := template.New("base").Funcs(shared.GetViewsFuncMap()).ParseFiles(files...)
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -95,17 +83,18 @@ func (app *application) filteredOrdersView(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	funcMap := template.FuncMap{
-		"timeFormatting": func() string { return time.DateTime },
-	}
-
-	ts, err := template.New("base").Funcs(funcMap).ParseFiles(files...)
+	ts, err := template.New("base").Funcs(shared.GetViewsFuncMap()).ParseFiles(files...)
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	err = ts.ExecuteTemplate(w, "base", orders)
+
+	data := struct {
+		Orders     *[]data.Order
+		TotalPages int
+	}{Orders: &orders, TotalPages: (len(orders) + itemsPerPage - 1) / itemsPerPage}
+	err = ts.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
