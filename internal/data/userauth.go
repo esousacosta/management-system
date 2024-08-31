@@ -25,7 +25,7 @@ type UserAuthModel struct {
 	db *sql.DB
 }
 
-func (um *UserAuthModel) GetUser(email string) (*UserAuth, error) {
+func (um *UserAuthModel) GetUserAuth(email string) (*UserAuth, error) {
 	query := `SELECT *
 				FROM user_auth
 				WHERE email = $1`

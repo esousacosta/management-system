@@ -362,6 +362,7 @@ func (app *application) loginHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		app.loginForm(w, r)
 	case http.MethodPost:
+		app.loginProcess(w, r)
 		return
 	default:
 		http.Error(w, "The requested HTTP method is not allowed on this endpoint", http.StatusMethodNotAllowed)
@@ -382,13 +383,42 @@ func (app *application) loginForm(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 
-	type htmlEnhancingData struct {
+	type htmlClassesEnhancingData struct {
 		Centralized bool
 	}
 
-	err = ts.ExecuteTemplate(w, "base", htmlEnhancingData{Centralized: true})
+	err = ts.ExecuteTemplate(w, "base", htmlClassesEnhancingData{Centralized: true})
 	if err != nil {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
+}
+
+func (app *application) loginProcess(w http.ResponseWriter, r *http.Request) {
+	log.Print("[START] Login request")
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "invalid authentication information received", http.StatusBadRequest)
+		return
+	}
+
+	email := r.PostFormValue("email")
+	password := r.PostFormValue("password")
+
+	userAuth := data.UserAuth{
+		Email:    email,
+		Password: password,
+	}
+
+	authorized, errorCode := app.managSysModel.RequestAuth(userAuth)
+	if errorCode != http.StatusOK {
+		http.Error(w, "Authentication failed: invalid user credentials", http.StatusUnauthorized)
+		return
+	}
+
+	if authorized {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
+
+	http.Error(w, "invalid credentials", http.StatusUnauthorized)
 }

@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/esousacosta/managementsystem/cmd/shared"
 	"github.com/esousacosta/managementsystem/internal/data"
 )
 
@@ -16,6 +17,7 @@ type errorCode int
 type ManagementSystemModel struct {
 	PartsEndpoint  string
 	OrdersEndpoint string
+	AuthEndpoint   string
 }
 
 type PartsResponse struct {
@@ -30,10 +32,15 @@ type PartResponse struct {
 	Parts data.Part `json:"part"`
 }
 
-func NewManagementSystemModel(ordersEndpoint string, partsEndpoint string) ManagementSystemModel {
+type AuthResponse struct {
+	Authorized bool `json:"authorized"`
+}
+
+func NewManagementSystemModel(ordersEndpoint string, partsEndpoint string, authEndpoint string) ManagementSystemModel {
 	return ManagementSystemModel{
 		PartsEndpoint:  partsEndpoint,
 		OrdersEndpoint: ordersEndpoint,
+		AuthEndpoint:   authEndpoint,
 	}
 }
 
@@ -205,4 +212,45 @@ func (managSysMoel *ManagementSystemModel) PostOrder(order *data.Order) errorCod
 	}
 
 	return http.StatusCreated
+}
+
+func (managSysMoel *ManagementSystemModel) RequestAuth(userAuth data.UserAuth) (bool, errorCode) {
+	client := &http.Client{}
+
+	data, err := json.Marshal(userAuth)
+	if err != nil {
+		log.Printf("[ERROR] - %s", err.Error())
+		return false, http.StatusBadRequest
+	}
+
+	req, err := http.NewRequest("POST", managSysMoel.AuthEndpoint+"/", bytes.NewBuffer(data))
+	if err != nil {
+		log.Printf("[ERROR] - %s", err.Error())
+		return false, http.StatusInternalServerError
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("[ERROR] - %s", err.Error())
+		return false, http.StatusInternalServerError
+	}
+
+	defer resp.Body.Close()
+
+	data, err = io.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("[ERROR] - %s", err.Error())
+		return false, http.StatusInternalServerError
+	}
+
+	var authResponse AuthResponse
+	err = json.Unmarshal(data, &authResponse)
+	if err != nil {
+		log.Printf("[%s - ERROR] %s", shared.GetCallerInfo(), err.Error())
+		return false, http.StatusInternalServerError
+	}
+
+	log.Print(authResponse)
+
+	return authResponse.Authorized, http.StatusOK
 }

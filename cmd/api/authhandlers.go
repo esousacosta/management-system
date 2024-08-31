@@ -64,7 +64,7 @@ func (app *application) processUserAuth(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	user, err := app.model.UsersAuth.GetUser(*userAuth.Email)
+	user, err := app.model.UsersAuth.GetUserAuth(*userAuth.Email)
 	if err != nil {
 		http.Error(w, "incorrect user credentials", http.StatusBadRequest)
 		return
@@ -81,7 +81,7 @@ func (app *application) processUserAuth(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err = writeJson(w, http.StatusOK, envelope{"authorization": true}, nil)
+	err = writeJson(w, http.StatusOK, envelope{"authorized": true}, nil)
 	if err != nil {
 		http.Error(w, "error writing response", http.StatusInternalServerError)
 		return
