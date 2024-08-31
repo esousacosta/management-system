@@ -32,12 +32,14 @@ a {
     display: flex;
     flex-direction: row;
     align-self: stretch;
+    font-size: 1.2em;
 }
 
 .navbar-opts {
     margin-left: auto;
     display: flex;
     flex-direction: row;
+    flex: 1 0 auto;
     gap: 1em;
     padding: 0 40px;
 }
@@ -46,9 +48,19 @@ a {
     list-style-type: none;
 }
 
+.navbar-btn {
+    margin-right: auto;
+}
+
 .order-search-form {
+    margin: 0 auto;
     display: flex;
     gap: 0.5em;
+    font-size: 1rem;
+}
+
+.order-search-form > * {
+    font-size: 1rem;
 }
 
 /* main table section */
@@ -72,6 +84,7 @@ a {
 /* single part page */
 .part-attr {
     list-style-type: none;
+    font-size: 1.5em;
 }
 
 .part-attr > span {
