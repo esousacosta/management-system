@@ -17,11 +17,6 @@ const (
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-		return
-	}
-
 	files := []string{
 		"./ui/html/base.html",
 		"./ui/html/pages/orders.html",
@@ -42,10 +37,29 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	page := r.URL.Query().Get("page")
+	if page == "" {
+		page = "1"
+	}
+	pageNbr, err := strconv.Atoi(page)
+	if err != nil {
+		log.Printf("[%s - ERROR] %s", shared.GetCallerInfo(), err.Error())
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	startIdx := (pageNbr - 1) * itemsPerPage
+	endIdx := startIdx + itemsPerPage
+	if endIdx > len(*orders) {
+		endIdx = len(*orders)
+	}
+
+	currentPageOrders := (*orders)[startIdx:endIdx]
 	data := struct {
-		Orders     *[]data.Order
-		TotalPages int
-	}{Orders: orders, TotalPages: (len(*orders) + itemsPerPage - 1) / itemsPerPage}
+		Orders      *[]data.Order
+		CurrentPage int
+		TotalPages  int
+	}{Orders: &currentPageOrders, CurrentPage: pageNbr, TotalPages: (len(*orders) + itemsPerPage - 1) / itemsPerPage}
 
 	err = ts.ExecuteTemplate(w, "base", data)
 	if err != nil {

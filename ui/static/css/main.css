@@ -84,6 +84,12 @@ a {
 
 /* orders table section */
 
+.orders-main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
 .orders-table {
     align-self: center;
     border: 1px solid gray;
@@ -101,10 +107,25 @@ a {
     text-align: center;
 }
 
-.pagination a {
-    margin: 0 5px;
+.pagination {
+    display: flex;
+    justify-content: end;
+    gap: 0.5em;
+}
+
+.pagination-item a {
     text-decoration: none;
+}
+
+.pagination-item .active-item {
     color: blue;
+    font-weight: bold;
+}
+
+.pagination-item {
+    padding: 0.2em 0.5em;
+    border: 1px solid gray;
+    border-radius: 0.2em;
 }
 
 /* single part page */

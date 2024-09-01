@@ -1,7 +1,7 @@
 {{define "title"}} Peças {{end}}
 
 {{define "main"}}
-<article>
+<article class="orders-main-content">
    {{if .}}
    <table class="orders-table">
       <thead>
@@ -18,12 +18,12 @@
             <td>{{.ClientId}}</td>
             <td>{{.CreatedAt.Format timeFormatting}}</td>
             <td>{{range .Services}}
-                <p>{{.}}</p>
-                {{end}}
+               <p>{{.}}</p>
+               {{end}}
             </td>
             <td>{{range .PartsRefs}}
-                <span><a href="/part/view/{{.}}">{{.}}</a></span>
-                {{end}}
+               <span><a href="/part/view/{{.}}">{{.}}</a></span>
+               {{end}}
             </td>
             <td>{{.Comment}}</td>
             <td>{{.Total}}</td>
@@ -33,7 +33,9 @@
    </table>
    <div class="pagination">
       {{range $i := (seq 1 .TotalPages)}}
-      <a>{{$i}}</a>
+      <div class="pagination-item">
+         <a href="/?page={{$i}}" {{if (eq $.CurrentPage $i)}}class="active-item"{{end}}>{{$i}}</a>
+      </div>
       {{end}}
    </div>
    {{else}}
