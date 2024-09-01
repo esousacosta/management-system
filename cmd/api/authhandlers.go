@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/esousacosta/managementsystem/cmd/shared"
 	"golang.org/x/crypto/bcrypt"
@@ -30,8 +31,14 @@ func (app *application) createUserAuth(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error parsing the user credentials", http.StatusInternalServerError)
 		return
 	}
-
 	userAuth.Password = &hashedPassword
+
+	userJwtSecret, err := shared.GenerateUserRandomJwtSecret()
+	if userJwtSecret == "" {
+		app.logger.Printf("[%s] ERROR - %v", shared.GetCallerInfo(), err)
+		http.Error(w, "error processing user creation request. Try again later.", http.StatusInternalServerError)
+	}
+	userAuth.JwtSecret = &userJwtSecret
 
 	err = app.model.UsersAuth.InsertUser(userAuth)
 	if err != nil {
@@ -80,6 +87,35 @@ func (app *application) processUserAuth(w http.ResponseWriter, r *http.Request) 
 		}
 		return
 	}
+
+	// Set JWT Token on the response cookie
+	unsignedToken, err := shared.GenerateUnsignedJwtToken(user.Email)
+	if err != nil {
+		app.logger.Printf("[%s] ERROR - %v", shared.GetCallerInfo(), err)
+		http.Error(w, "error generating authentication token", http.StatusInternalServerError)
+		return
+	}
+
+	signedToken, err := unsignedToken.SignedString([]byte(user.JwtSecret))
+	if err != nil {
+		app.logger.Printf("[%s] ERROR - %v", shared.GetCallerInfo(), err)
+		http.Error(w, "error generating authentication token", http.StatusInternalServerError)
+		return
+	}
+
+	cookieExpirationTime := time.Now().Add(time.Minute * 30)
+	cookie := http.Cookie{
+		Name:     "auth",
+		Value:    signedToken,
+		Expires:  cookieExpirationTime,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+		Path:     "/",
+		Domain:   "127.0.0.1",
+	}
+
+	http.SetCookie(w, &cookie)
 
 	err = writeJson(w, http.StatusOK, envelope{"authenticated": true}, nil)
 	if err != nil {

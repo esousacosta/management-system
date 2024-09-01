@@ -1,7 +1,9 @@
 package shared
 
 import (
+	"crypto/rand"
 	"crypto/x509"
+	"encoding/base64"
 	"html/template"
 	"log"
 	"net/http"
@@ -10,7 +12,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
+)
+
+const (
+	jwtSecretSize    int    = 32
+	webServerEnpoint string = "localhost:4000"
 )
 
 func GetViewsFuncMap() template.FuncMap {
@@ -35,6 +43,29 @@ func HashPassword(password string) (string, error) {
 	passwordBytes := []byte(password)
 	hashedPasswordBytes, err := bcrypt.GenerateFromPassword(passwordBytes, 14)
 	return string(hashedPasswordBytes), err
+}
+
+func GenerateUnsignedJwtToken(userEmail string) (*jwt.Token, error) {
+	// 30m expiration for non-sensitive applications - OWASP
+	tokenExpirationTime := time.Now().Add(time.Minute * 30)
+
+	claims := jwt.RegisteredClaims{
+		ID:        userEmail,
+		Issuer:    "localhost:4000",
+		ExpiresAt: jwt.NewNumericDate(tokenExpirationTime),
+	}
+
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims), nil
+
+}
+
+func GenerateUserRandomJwtSecret() (string, error) {
+	secret := make([]byte, 32)
+	_, err := rand.Read(secret)
+	if err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(secret), nil
 }
 
 func GetCallerInfo() string {
