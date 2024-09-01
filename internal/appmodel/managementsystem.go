@@ -46,7 +46,12 @@ func NewManagementSystemModel(ordersEndpoint string, partsEndpoint string, authE
 }
 
 func (managSysModel *ManagementSystemModel) GetAllParts() (*[]data.Part, error) {
-	resp, err := http.Get(managSysModel.PartsEndpoint)
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{RootCAs: shared.GetCertPool()},
+		},
+	}
+	resp, err := client.Get(managSysModel.PartsEndpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +78,12 @@ func (managSysModel *ManagementSystemModel) GetAllParts() (*[]data.Part, error) 
 }
 
 func (managSysModel *ManagementSystemModel) GetPart(partRef string) (*data.Part, error) {
-	resp, err := http.Get(managSysModel.PartsEndpoint + "/" + partRef)
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{RootCAs: shared.GetCertPool()},
+		},
+	}
+	resp, err := client.Get(managSysModel.PartsEndpoint + "/" + partRef)
 	if err != nil {
 		return nil, fmt.Errorf("part with reference %s not found", partRef)
 	}
@@ -100,7 +110,11 @@ func (managSysModel *ManagementSystemModel) GetPart(partRef string) (*data.Part,
 }
 
 func (managSysMoel *ManagementSystemModel) PostPart(part *data.Part) errorCode {
-	client := &http.Client{}
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{RootCAs: shared.GetCertPool()},
+		},
+	}
 	data, err := json.Marshal(part)
 	if err != nil {
 		log.Print(err)
@@ -163,7 +177,12 @@ func (managSysModel *ManagementSystemModel) GetAllOrders() (*[]data.Order, error
 }
 
 func (managSysModel *ManagementSystemModel) GetOrdersByClientId(clientId string) ([]data.Order, error) {
-	resp, err := http.Get(managSysModel.OrdersEndpoint + "/search?clientid=" + clientId)
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{RootCAs: shared.GetCertPool()},
+		},
+	}
+	resp, err := client.Get(managSysModel.OrdersEndpoint + "/search?clientid=" + clientId)
 	if err != nil {
 		return nil, fmt.Errorf("order with client ID %s not found", clientId)
 	}
@@ -190,7 +209,11 @@ func (managSysModel *ManagementSystemModel) GetOrdersByClientId(clientId string)
 }
 
 func (managSysMoel *ManagementSystemModel) PostOrder(order *data.Order) errorCode {
-	client := &http.Client{}
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{RootCAs: shared.GetCertPool()},
+		},
+	}
 	data, err := json.Marshal(order)
 	if err != nil {
 		log.Print(err)
@@ -221,7 +244,11 @@ func (managSysMoel *ManagementSystemModel) PostOrder(order *data.Order) errorCod
 }
 
 func (managSysMoel *ManagementSystemModel) RequestAuth(userAuth data.UserAuth) (bool, errorCode) {
-	client := &http.Client{}
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{RootCAs: shared.GetCertPool()},
+		},
+	}
 
 	data, err := json.Marshal(userAuth)
 	if err != nil {
