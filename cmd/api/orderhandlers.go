@@ -12,7 +12,7 @@ func (app *application) getCreateOrdersHandler(w http.ResponseWriter, r *http.Re
 	case http.MethodGet:
 		orders, err := app.model.Orders.GetAll()
 		if err != nil {
-			app.logger.Print(err.Error())
+			app.logger.Printf("[%s - ERROR] %s", shared.GetCallerInfo(), err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}

@@ -2,6 +2,7 @@ package appmodel
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -130,7 +131,12 @@ func (managSysMoel *ManagementSystemModel) PostPart(part *data.Part) errorCode {
 }
 
 func (managSysModel *ManagementSystemModel) GetAllOrders() (*[]data.Order, error) {
-	resp, err := http.Get(managSysModel.OrdersEndpoint)
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{RootCAs: shared.GetCertPool()},
+		},
+	}
+	resp, err := client.Get(managSysModel.OrdersEndpoint)
 	if err != nil {
 		return nil, err
 	}

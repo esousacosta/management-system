@@ -30,7 +30,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 	orders, err := app.managSysModel.GetAllOrders()
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("[%s - ERROR] %s", shared.GetCallerInfo(), err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -49,7 +49,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 	err = ts.ExecuteTemplate(w, "base", data)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("[%s - ERROR] %s", shared.GetCallerInfo(), err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}

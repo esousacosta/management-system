@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"flag"
 	"fmt"
 	"log"
@@ -8,6 +9,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/esousacosta/managementsystem/cmd/shared"
 	"github.com/esousacosta/managementsystem/internal/data"
 )
 
@@ -42,8 +44,18 @@ func main() {
 
 	addr := fmt.Sprintf("localhost:%d", app.config.port)
 
+	cert, err := tls.LoadX509KeyPair("./cert/domain.crt", "./cert/private.key")
+	if err != nil {
+		log.Fatalf("[%s - ERROR] %s", shared.GetCallerInfo(), err)
+	}
+
+	tlsCfg := &tls.Config{
+		Certificates: []tls.Certificate{cert}}
+	// InsecureSkipVerify: true}
+
 	srv := http.Server{
 		Addr:         addr,
+		TLSConfig:    tlsCfg,
 		Handler:      app.route(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
@@ -51,6 +63,6 @@ func main() {
 	}
 
 	app.logger.Printf("[%s] Server starting on port %d", app.config.env, app.config.port)
-	err := srv.ListenAndServe()
+	err = srv.ListenAndServeTLS("", "")
 	app.logger.Fatal(err)
 }

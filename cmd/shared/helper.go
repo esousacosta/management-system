@@ -1,8 +1,11 @@
 package shared
 
 import (
+	"crypto/x509"
 	"html/template"
+	"log"
 	"net/http"
+	"os"
 	"runtime"
 	"strconv"
 	"time"
@@ -41,4 +44,15 @@ func GetCallerInfo() string {
 		return file + " (line #" + lineNumber + ") - " + runtime.FuncForPC(pc).Name()
 	}
 	return ""
+}
+
+func GetCertPool() *x509.CertPool {
+	certPool := x509.NewCertPool()
+	serverCert, err := os.ReadFile("./cert/domain.crt")
+	if err != nil {
+		log.Fatalf("[%s - ERROR] %s", GetCallerInfo(), err)
+	}
+
+	certPool.AppendCertsFromPEM(serverCert)
+	return certPool
 }
