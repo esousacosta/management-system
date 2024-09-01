@@ -254,7 +254,7 @@ func (app *application) viewPart(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(*ref)
 	part, err := app.managSysModel.GetPart(*ref)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("[%s - ERROR] %s", shared.GetCallerInfo(), err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}

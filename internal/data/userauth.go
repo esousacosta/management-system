@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/esousacosta/managementsystem/cmd/shared"
 )
 
 type UserAuth struct {
@@ -34,7 +36,7 @@ func (um *UserAuthModel) GetUserAuth(email string) (*UserAuth, error) {
 
 	err := um.db.QueryRow(query, email).Scan(&user.Email, &user.Password, &user.CreatedAt, &user.ID)
 	if err != nil {
-		log.Printf("get user_auth info query error --> %s", err.Error())
+		log.Printf("[%s] get user_auth info query error --> %s", shared.GetCallerInfo(), err.Error())
 		return nil, fmt.Errorf("error fetching user information from the database")
 	}
 

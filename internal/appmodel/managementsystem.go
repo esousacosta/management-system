@@ -109,7 +109,7 @@ func (managSysModel *ManagementSystemModel) GetPart(partRef string) (*data.Part,
 	return &partResponse.Parts, nil
 }
 
-func (managSysMoel *ManagementSystemModel) PostPart(part *data.Part) errorCode {
+func (managSysModel *ManagementSystemModel) PostPart(part *data.Part) errorCode {
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{RootCAs: shared.GetCertPool()},
@@ -121,7 +121,7 @@ func (managSysMoel *ManagementSystemModel) PostPart(part *data.Part) errorCode {
 		return http.StatusBadRequest
 	}
 
-	req, err := http.NewRequest("POST", managSysMoel.PartsEndpoint, bytes.NewBuffer(data))
+	req, err := http.NewRequest("POST", managSysModel.PartsEndpoint, bytes.NewBuffer(data))
 	if err != nil {
 		log.Print(err)
 		return http.StatusBadRequest
@@ -208,7 +208,7 @@ func (managSysModel *ManagementSystemModel) GetOrdersByClientId(clientId string)
 	return ordersResponse.Orders, nil
 }
 
-func (managSysMoel *ManagementSystemModel) PostOrder(order *data.Order) errorCode {
+func (managSysModel *ManagementSystemModel) PostOrder(order *data.Order) errorCode {
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{RootCAs: shared.GetCertPool()},
@@ -220,7 +220,7 @@ func (managSysMoel *ManagementSystemModel) PostOrder(order *data.Order) errorCod
 		return http.StatusBadRequest
 	}
 
-	req, err := http.NewRequest("POST", managSysMoel.OrdersEndpoint, bytes.NewBuffer(data))
+	req, err := http.NewRequest("POST", managSysModel.OrdersEndpoint, bytes.NewBuffer(data))
 	if err != nil {
 		log.Print(err)
 		return http.StatusBadRequest
@@ -243,7 +243,7 @@ func (managSysMoel *ManagementSystemModel) PostOrder(order *data.Order) errorCod
 	return http.StatusCreated
 }
 
-func (managSysMoel *ManagementSystemModel) RequestAuth(userAuth data.UserAuth) (bool, errorCode) {
+func (managSysModel *ManagementSystemModel) RequestAuth(userAuth data.UserAuth) (bool, errorCode) {
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{RootCAs: shared.GetCertPool()},
@@ -256,7 +256,7 @@ func (managSysMoel *ManagementSystemModel) RequestAuth(userAuth data.UserAuth) (
 		return false, http.StatusBadRequest
 	}
 
-	req, err := http.NewRequest("POST", managSysMoel.AuthEndpoint+"/", bytes.NewBuffer(data))
+	req, err := http.NewRequest("POST", managSysModel.AuthEndpoint+"/", bytes.NewBuffer(data))
 	if err != nil {
 		log.Printf("[ERROR] - %s", err.Error())
 		return false, http.StatusInternalServerError

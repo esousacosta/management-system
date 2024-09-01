@@ -76,7 +76,7 @@ func (app *application) getPart(w http.ResponseWriter, r *http.Request) {
 	ref := shared.GetUniqueIdentifierFromUrl("/v1/parts/", r)
 	part, err := app.model.Parts.GetByRef(*ref)
 	if err != nil {
-		app.logger.Printf("[ERROR] - %v", err)
+		app.logger.Printf("[%s] ERROR - %s", shared.GetCallerInfo(), err.Error())
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
@@ -92,7 +92,7 @@ func (app *application) updatePart(w http.ResponseWriter, r *http.Request) {
 	ref := shared.GetUniqueIdentifierFromUrl("/v1/parts/", r)
 	part, err := app.model.Parts.GetByRef(*ref)
 	if err != nil {
-		app.logger.Printf("[ERROR] - %v", err)
+		app.logger.Printf("[%s] ERROR - %s", shared.GetCallerInfo(), err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
