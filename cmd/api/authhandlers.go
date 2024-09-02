@@ -96,6 +96,7 @@ func (app *application) processUserAuth(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// the key needs to be of type []byte
 	signedToken, err := unsignedToken.SignedString([]byte(user.JwtSecret))
 	if err != nil {
 		app.logger.Printf("[%s] ERROR - %v", shared.GetCallerInfo(), err)

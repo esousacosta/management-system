@@ -243,7 +243,7 @@ func (managSysModel *ManagementSystemModel) PostOrder(order *data.Order) errorCo
 	return http.StatusCreated
 }
 
-func (managSysModel *ManagementSystemModel) RequestAuth(userAuth data.UserAuth) (bool, errorCode) {
+func (managSysModel *ManagementSystemModel) RequestAuth(userAuth data.UserAuth) (string, bool, errorCode) {
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{RootCAs: shared.GetCertPool()},
@@ -253,19 +253,19 @@ func (managSysModel *ManagementSystemModel) RequestAuth(userAuth data.UserAuth) 
 	data, err := json.Marshal(userAuth)
 	if err != nil {
 		log.Printf("[ERROR] - %s", err.Error())
-		return false, http.StatusBadRequest
+		return "", false, http.StatusBadRequest
 	}
 
 	req, err := http.NewRequest("POST", managSysModel.AuthEndpoint+"/", bytes.NewBuffer(data))
 	if err != nil {
 		log.Printf("[ERROR] - %s", err.Error())
-		return false, http.StatusInternalServerError
+		return "", false, http.StatusInternalServerError
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("[ERROR] - %s", err.Error())
-		return false, http.StatusInternalServerError
+		return "", false, http.StatusInternalServerError
 	}
 
 	defer resp.Body.Close()
@@ -273,17 +273,20 @@ func (managSysModel *ManagementSystemModel) RequestAuth(userAuth data.UserAuth) 
 	data, err = io.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("[ERROR] - %s", err.Error())
-		return false, http.StatusInternalServerError
+		return "", false, http.StatusInternalServerError
 	}
+
+	respCookies := resp.Header.Get("Set-Cookie")
+	log.Printf("auth response header: %v", respCookies)
 
 	var authResponse AuthResponse
 	err = json.Unmarshal(data, &authResponse)
 	if err != nil {
 		log.Printf("[%s - ERROR] %s", shared.GetCallerInfo(), err.Error())
-		return false, http.StatusInternalServerError
+		return "", false, http.StatusInternalServerError
 	}
 
 	log.Printf("[%s] Authorized: %v", shared.GetCallerInfo(), authResponse.Authorized)
 
-	return authResponse.Authorized, http.StatusOK
+	return respCookies, authResponse.Authorized, http.StatusOK
 }

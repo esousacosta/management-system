@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/esousacosta/managementsystem/cmd/shared"
 	"github.com/esousacosta/managementsystem/internal/data"
@@ -430,12 +431,24 @@ func (app *application) loginProcess(w http.ResponseWriter, r *http.Request) {
 		Password: password,
 	}
 
-	authenticated, errorCode := app.managSysModel.RequestAuth(userAuth)
+	responseCookies, authenticated, errorCode := app.managSysModel.RequestAuth(userAuth)
 	if errorCode != http.StatusOK {
 		http.Error(w, "Authentication failed: invalid user credentials", http.StatusUnauthorized)
 		return
 	}
 
+	r.Header.Set("Cookie", responseCookies)
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth",
+		Value:    responseCookies,
+		Expires:  time.Now().Add(time.Minute * 30),
+		HttpOnly: true,
+		Secure:   true, // Use false for HTTP
+		SameSite: http.SameSiteStrictMode,
+		Path:     "/",
+	})
+
+	log.Printf("cookies after receiving auth confirmation from web server: %v", r.Header.Get("Cookie"))
 	if authenticated {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
