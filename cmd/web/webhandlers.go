@@ -430,29 +430,15 @@ func (app *application) loginProcess(w http.ResponseWriter, r *http.Request) {
 		Password: password,
 	}
 
-	_, authenticated, errorCode := app.managSysModel.RequestAuth(userAuth, w)
+	authenticated, errorCode := app.managSysModel.RequestAuth(userAuth)
 	if errorCode != http.StatusOK {
 		http.Error(w, "Authentication failed: invalid user credentials", http.StatusUnauthorized)
 		return
 	}
 
-	// log.Printf("received cookies in the reply: %s", responseCookies)
-
-	// r.Header.Set("Cookie", responseCookies)
-	// http.SetCookie(w, &http.Cookie{
-	// 	Name:     "auth",
-	// 	Value:    responseCookies,
-	// 	Expires:  time.Now().Add(time.Minute * 30),
-	// 	HttpOnly: true,
-	// 	Secure:   true, // Use false for HTTP
-	// 	SameSite: http.SameSiteStrictMode,
-	// 	Path:     "/",
-	// })
-
-	log.Printf("Request header: %v", r.Header)
-	log.Printf("ResponseWriter header: %v", w.Header())
 	if authenticated {
-		http.Redirect(w, r, "/parts", http.StatusSeeOther)
+		log.Printf("[%s] Authentication successfull for user %s", shared.GetCallerInfo(), email)
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
 

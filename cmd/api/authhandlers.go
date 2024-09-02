@@ -121,15 +121,9 @@ func (app *application) processUserAuth(w http.ResponseWriter, r *http.Request) 
 
 	http.SetCookie(w, cookie)
 
-	// origin := r.Header.Get("Origin")
-	app.logger.Printf("[SERVER] Received request headers: %v", r.Header)
-	// headers := make(http.Header)
-	// headers["Access-Control-Allow-Origin"] = []string{"https://localhost:3000"}
-	// headers["Access-Control-Allow-Credentials"] = []string{"true"}
-	// headers["Set-Cookie"] = []string{signedToken}
-
 	err = writeJson(w, http.StatusOK, envelope{"authenticated": true}, nil)
 	if err != nil {
+		app.logger.Printf("[%s] ERROR - %v", shared.GetCallerInfo(), err)
 		http.Error(w, "error writing response", http.StatusInternalServerError)
 		return
 	}

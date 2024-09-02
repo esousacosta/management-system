@@ -49,10 +49,9 @@ func GenerateUnsignedJwtToken(userEmail string) (*jwt.Token, error) {
 	// 30m expiration for non-sensitive applications - OWASP
 	tokenExpirationTime := time.Now().Add(time.Minute * 30)
 
-	claims := jwt.RegisteredClaims{
-		ID:        userEmail,
-		Issuer:    "localhost:4000",
-		ExpiresAt: jwt.NewNumericDate(tokenExpirationTime),
+	claims := jwt.MapClaims{
+		"id":  userEmail,
+		"exp": jwt.NewNumericDate(tokenExpirationTime),
 	}
 
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims), nil
@@ -60,7 +59,7 @@ func GenerateUnsignedJwtToken(userEmail string) (*jwt.Token, error) {
 }
 
 func GenerateUserRandomJwtSecret() (string, error) {
-	secret := make([]byte, 32)
+	secret := make([]byte, jwtSecretSize)
 	_, err := rand.Read(secret)
 	if err != nil {
 		return "", err
