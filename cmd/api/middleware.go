@@ -25,17 +25,11 @@ func (app *application) validateSession(finalHandler http.HandlerFunc) http.Hand
 		}
 
 		token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
-			claims, ok := token.Claims.(jwt.MapClaims)
-			if !ok {
-				return nil, fmt.Errorf("[%s] ERROR - Invalid JWT claims", shared.GetCallerInfo())
+			userEmail, err := shared.GetValueFromKeyOnJwtTokenClaims(token, "id")
+			if err != nil {
+				return nil, fmt.Errorf("[%s] ERROR - No valid user email in JWT Token claims", shared.GetCallerInfo())
 			}
-			app.logger.Printf("cookies: %v", cookie)
-			app.logger.Printf("user email: %s", claims["id"])
-			userEmail, ok := claims["id"].(string)
-			if !ok {
-				return nil, fmt.Errorf("[%s] ERROR - Invalid User Email", shared.GetCallerInfo())
-			}
-			userAuth, err := app.model.UsersAuth.GetUserAuth(userEmail)
+			userAuth, err := app.model.UsersAuth.GetUserAuth(userEmail.(string))
 			if err != nil {
 				return nil, fmt.Errorf("[%s] ERROR - couldn't retrieve user", shared.GetCallerInfo())
 			}

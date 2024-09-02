@@ -254,6 +254,8 @@ func (managSysModel *ManagementSystemModel) RequestAuth(userAuth data.UserAuth, 
 	r.Header.Add("Cookie", resp.Header.Get("Set-Cookie"))
 	// The one below is used by http.Redirect to preserve the cookies
 	w.Header().Set("Set-Cookie", resp.Header.Get("Set-Cookie"))
+	w.Header().Set("Access-Control-Allow-Origin", resp.Header.Get("Access-Control-Allow-Origin"))
+	w.Header().Set("Access-Control-Allow-Credentials", resp.Header.Get("Access-Control-Allow-Credentials"))
 
 	var authResponse AuthResponse
 	err = json.Unmarshal(data, &authResponse)

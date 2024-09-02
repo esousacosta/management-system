@@ -104,10 +104,6 @@ func (app *application) processUserAuth(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// CORS setup
-	w.Header().Set("Access-Control-Allow-Origin", "https://localhost:3000/")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-
 	cookieExpirationTime := time.Now().Add(time.Minute * 30)
 	cookie := &http.Cookie{
 		Name:     "auth",
@@ -120,9 +116,14 @@ func (app *application) processUserAuth(w http.ResponseWriter, r *http.Request) 
 		Domain:   "localhost",
 	}
 
+	headers := make(http.Header)
+	// CORS setup
+	headers["Access-Control-Allow-Origin"] = []string{"https://localhost:3000/"}
+	headers["Access-Control-Allow-Credentials"] = []string{"true"}
+
 	http.SetCookie(w, cookie)
 
-	err = writeJson(w, http.StatusOK, envelope{"authenticated": true}, nil)
+	err = writeJson(w, http.StatusOK, envelope{"authenticated": true}, headers)
 	if err != nil {
 		app.logger.Printf("[%s] ERROR - %v", shared.GetCallerInfo(), err)
 		http.Error(w, "error writing response", http.StatusInternalServerError)

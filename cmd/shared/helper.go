@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"crypto/x509"
 	"encoding/base64"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -65,6 +66,19 @@ func GenerateUserRandomJwtSecret() (string, error) {
 		return "", err
 	}
 	return base64.URLEncoding.EncodeToString(secret), nil
+}
+
+func GetValueFromKeyOnJwtTokenClaims(token *jwt.Token, key string) (interface{}, error) {
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, fmt.Errorf("[%s] ERROR - Invalid JWT claims", GetCallerInfo())
+	}
+	log.Printf("Retrieved value <<%s>> from JWT Token Claims: %v", key, claims[key])
+	value, ok := claims[key].(string)
+	if !ok {
+		return nil, fmt.Errorf("[%s] ERROR - Invalid User Email", GetCallerInfo())
+	}
+	return value, nil
 }
 
 func GetCallerInfo() string {
