@@ -372,11 +372,13 @@ func (app *application) createPartProcess(w http.ResponseWriter, r *http.Request
 		Barcode:   barcode,
 	}
 
-	errorCode := app.managSysModel.PostPart(part)
+	errorCode := app.managSysModel.PostPart(part, r)
 	if errorCode != http.StatusCreated {
 		http.Error(w, http.StatusText(int(errorCode)), int(errorCode))
 		return
 	}
+
+	w.Header().Set("Set-Cookie", r.Header.Get("Cookie"))
 
 	http.Redirect(w, r, "/parts", http.StatusSeeOther)
 }

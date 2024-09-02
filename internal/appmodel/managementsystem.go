@@ -108,7 +108,7 @@ func (managSysModel *ManagementSystemModel) GetPart(partRef string) (*data.Part,
 	return &partResponse.Parts, nil
 }
 
-func (managSysModel *ManagementSystemModel) PostPart(part *data.Part) errorCode {
+func (managSysModel *ManagementSystemModel) PostPart(part *data.Part, r *http.Request) errorCode {
 	data, err := json.Marshal(part)
 	if err != nil {
 		log.Print(err)
@@ -121,6 +121,7 @@ func (managSysModel *ManagementSystemModel) PostPart(part *data.Part) errorCode 
 		return http.StatusBadRequest
 	}
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Cookie", r.Header.Get("Cookie"))
 
 	resp, err := managSysModel.Client.Do(req)
 	if err != nil {
