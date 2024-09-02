@@ -105,9 +105,10 @@ func (app *application) filteredOrdersView(w http.ResponseWriter, r *http.Reques
 	}
 
 	data := struct {
-		Orders     *[]data.Order
-		TotalPages int
-	}{Orders: &orders, TotalPages: (len(orders) + itemsPerPage - 1) / itemsPerPage}
+		Orders      *[]data.Order
+		CurrentPage int
+		TotalPages  int
+	}{Orders: &orders, CurrentPage: 1, TotalPages: (len(orders) + itemsPerPage - 1) / itemsPerPage}
 	err = ts.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		log.Print(err.Error())

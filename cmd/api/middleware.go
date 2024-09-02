@@ -33,32 +33,26 @@ func (app *application) validateSession(finalHandler http.HandlerFunc) http.Hand
 			if !ok {
 				return nil, fmt.Errorf("[%s] ERROR - Invalid User Email", shared.GetCallerInfo())
 			}
-			app.logger.Print("zzzzzzzzzzzzz ALL TOP zzzzzzzzzzzzz")
 			userAuth, err := app.model.UsersAuth.GetUserAuth(userEmail)
 			if err != nil {
 				return nil, fmt.Errorf("[%s] ERROR - couldn't retrieve user", shared.GetCallerInfo())
 			}
-			app.logger.Print("XXXXXXXXX ALL GOOD XXXXXXXXX")
 			return []byte(userAuth.JwtSecret), nil
 		})
 		if err != nil {
-			app.logger.Print("zzzzzzzzzzzzz ALL BAD zzzzzzzzzzzzz")
 			app.logger.Printf("[%s] ERROR - %v", shared.GetCallerInfo(), err)
 			http.Error(w, "authentication failed. Please log in", http.StatusUnauthorized)
 			return
 		}
 
-		app.logger.Print("KKKKKKKKKK ALL GOOD KKKKKKKKKK")
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			app.logger.Printf("[%s] ERROR - unexpected signing method", shared.GetCallerInfo())
 			http.Error(w, "authentication failed. Please log in", http.StatusUnauthorized)
 			return
 		}
 
-		app.logger.Print("HHHHHHHHH ALL GOOD HHHHHHHHH")
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			ctx := context.WithValue(r.Context(), myKey, claims)
-			app.logger.Print("YYYYYYYYYYYYY ALL STILL GOOD YYYYYYYYYYYYY")
 			finalHandler(w, r.WithContext(ctx))
 		} else {
 			app.logger.Printf("[%s] ERROR - invalid token or claims", shared.GetCallerInfo())
