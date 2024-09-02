@@ -5,7 +5,6 @@ import (
 	"flag"
 	"log"
 	"net/http"
-	"net/http/cookiejar"
 
 	"github.com/esousacosta/managementsystem/cmd/shared"
 	"github.com/esousacosta/managementsystem/internal/appmodel"
@@ -21,16 +20,21 @@ func main() {
 	ordersEndpoint := flag.String("ordersEndpoint", "https://localhost:4000/v1/orders", "Orders endpoint for accessing the management system web service")
 	authEndpoint := flag.String("authEndpoint", "https://localhost:4000/v1/auth", "Orders endpoint for accessing the management system web service")
 
-	cookieJar, err := cookiejar.New(nil)
-	if err != nil {
-		log.Fatalf("[%s] ERROR - %v", shared.GetCallerInfo(), err)
-	}
+	// cookieJar, err := cookiejar.New(nil)
+	// if err != nil {
+	// 	log.Fatalf("[%s] ERROR - %v", shared.GetCallerInfo(), err)
+	// }
 
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{RootCAs: shared.GetCertPool()},
 		},
-		Jar: cookieJar,
+		Jar: nil,
+		CheckRedirect: func(r *http.Request, via []*http.Request) error {
+			log.Printf("[REDIRECT] received headers: %v", r.Header)
+			r.Header.Add("Cookie", via[0].Header.Get("Cookie"))
+			return nil
+		},
 	}
 
 	app := application{managSysModel: appmodel.NewManagementSystemModel(*ordersEndpoint, *partsEndpoint, *authEndpoint, client)}

@@ -15,6 +15,8 @@ const myKey Key = 0
 
 func (app *application) validateSession(finalHandler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		app.logger.Printf("[START] Session validation")
+		app.logger.Printf("[%s] request headers: %v", shared.GetCallerInfo(), r.Header)
 		cookie, err := r.Cookie("auth")
 		if err != nil {
 			app.logger.Printf("[%s] ERROR - %v", shared.GetCallerInfo(), err)

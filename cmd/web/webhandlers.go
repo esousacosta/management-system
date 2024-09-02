@@ -228,7 +228,7 @@ func (app *application) partsView(w http.ResponseWriter, r *http.Request) {
 		"./ui/html/partials/nav.html",
 	}
 
-	parts, err := app.managSysModel.GetAllParts()
+	parts, err := app.managSysModel.GetAllParts(r)
 	if err != nil {
 		if err.Error() == "unexpected status: 401 Unauthorized" {
 			http.Redirect(w, r, "/unauthorized", http.StatusSeeOther)
@@ -434,7 +434,7 @@ func (app *application) loginProcess(w http.ResponseWriter, r *http.Request) {
 		Password: password,
 	}
 
-	authenticated, errorCode := app.managSysModel.RequestAuth(userAuth)
+	authenticated, errorCode := app.managSysModel.RequestAuth(userAuth, w, r)
 	if errorCode != http.StatusOK {
 		log.Printf("[%s] Authentication failed for user %s", shared.GetCallerInfo(), email)
 		http.Redirect(w, r, "/unauthorized", http.StatusTemporaryRedirect)
@@ -449,7 +449,6 @@ func (app *application) loginProcess(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("[%s] Authentication failed for user %s", shared.GetCallerInfo(), email)
 	http.Redirect(w, r, "/unauthorized", http.StatusTemporaryRedirect)
-	// http.Error(w, "invalid credentials", http.StatusUnauthorized)
 }
 
 func (app *application) getUnauthorizedHandler(w http.ResponseWriter, r *http.Request) {

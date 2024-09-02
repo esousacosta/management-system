@@ -18,7 +18,7 @@ type ManagementSystemModel struct {
 	PartsEndpoint  string
 	OrdersEndpoint string
 	AuthEndpoint   string
-	client         *http.Client
+	Client         *http.Client
 }
 
 type PartsResponse struct {
@@ -42,13 +42,20 @@ func NewManagementSystemModel(ordersEndpoint string, partsEndpoint string, authE
 		PartsEndpoint:  partsEndpoint,
 		OrdersEndpoint: ordersEndpoint,
 		AuthEndpoint:   authEndpoint,
-		client:         client,
+		Client:         client,
 	}
 }
 
-func (managSysModel *ManagementSystemModel) GetAllParts() (*[]data.Part, error) {
-	resp, err := managSysModel.client.Get(managSysModel.PartsEndpoint)
+func (managSysModel *ManagementSystemModel) GetAllParts(r *http.Request) (*[]data.Part, error) {
+	req, err := http.NewRequest("GET", managSysModel.PartsEndpoint, nil)
 	if err != nil {
+		log.Printf("[%s] ERROR - %v", shared.GetCallerInfo(), err)
+		return nil, err
+	}
+	req.Header = r.Header
+	resp, err := managSysModel.Client.Do(req)
+	if err != nil {
+		log.Printf("[%s] ERROR - %v", shared.GetCallerInfo(), err)
 		return nil, err
 	}
 
@@ -75,7 +82,7 @@ func (managSysModel *ManagementSystemModel) GetAllParts() (*[]data.Part, error) 
 }
 
 func (managSysModel *ManagementSystemModel) GetPart(partRef string) (*data.Part, error) {
-	resp, err := managSysModel.client.Get(managSysModel.PartsEndpoint + "/" + partRef)
+	resp, err := managSysModel.Client.Get(managSysModel.PartsEndpoint + "/" + partRef)
 	if err != nil {
 		return nil, fmt.Errorf("part with reference %s not found", partRef)
 	}
@@ -115,7 +122,7 @@ func (managSysModel *ManagementSystemModel) PostPart(part *data.Part) errorCode 
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := managSysModel.client.Do(req)
+	resp, err := managSysModel.Client.Do(req)
 	if err != nil {
 		log.Print(err)
 		return http.StatusInternalServerError
@@ -132,7 +139,7 @@ func (managSysModel *ManagementSystemModel) PostPart(part *data.Part) errorCode 
 }
 
 func (managSysModel *ManagementSystemModel) GetAllOrders() (*[]data.Order, error) {
-	resp, err := managSysModel.client.Get(managSysModel.OrdersEndpoint)
+	resp, err := managSysModel.Client.Get(managSysModel.OrdersEndpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +166,7 @@ func (managSysModel *ManagementSystemModel) GetAllOrders() (*[]data.Order, error
 }
 
 func (managSysModel *ManagementSystemModel) GetOrdersByClientId(clientId string) ([]data.Order, error) {
-	resp, err := managSysModel.client.Get(managSysModel.OrdersEndpoint + "/search?clientid=" + clientId)
+	resp, err := managSysModel.Client.Get(managSysModel.OrdersEndpoint + "/search?clientid=" + clientId)
 	if err != nil {
 		return nil, fmt.Errorf("order with client ID %s not found", clientId)
 	}
@@ -199,7 +206,7 @@ func (managSysModel *ManagementSystemModel) PostOrder(order *data.Order) errorCo
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := managSysModel.client.Do(req)
+	resp, err := managSysModel.Client.Do(req)
 	if err != nil {
 		log.Print(err)
 		return http.StatusInternalServerError
@@ -215,7 +222,7 @@ func (managSysModel *ManagementSystemModel) PostOrder(order *data.Order) errorCo
 	return http.StatusCreated
 }
 
-func (managSysModel *ManagementSystemModel) RequestAuth(userAuth data.UserAuth) (bool, errorCode) {
+func (managSysModel *ManagementSystemModel) RequestAuth(userAuth data.UserAuth, w http.ResponseWriter, r *http.Request) (bool, errorCode) {
 	data, err := json.Marshal(userAuth)
 	if err != nil {
 		log.Printf("[ERROR] - %s", err.Error())
@@ -228,7 +235,7 @@ func (managSysModel *ManagementSystemModel) RequestAuth(userAuth data.UserAuth) 
 		return false, http.StatusInternalServerError
 	}
 
-	resp, err := managSysModel.client.Do(req)
+	resp, err := managSysModel.Client.Do(req)
 	if err != nil {
 		log.Printf("[ERROR] - %s", err.Error())
 		return false, http.StatusInternalServerError
@@ -241,6 +248,11 @@ func (managSysModel *ManagementSystemModel) RequestAuth(userAuth data.UserAuth) 
 		log.Printf("[ERROR] - %s", err.Error())
 		return false, http.StatusInternalServerError
 	}
+
+	// This one I'm not sure it's needed
+	r.Header.Add("Cookie", resp.Header.Get("Set-Cookie"))
+	// The one below is used by http.Redirect to preserve the cookies
+	w.Header().Set("Set-Cookie", resp.Header.Get("Set-Cookie"))
 
 	var authResponse AuthResponse
 	err = json.Unmarshal(data, &authResponse)
