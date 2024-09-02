@@ -230,7 +230,10 @@ func (app *application) partsView(w http.ResponseWriter, r *http.Request) {
 
 	parts, err := app.managSysModel.GetAllParts()
 	if err != nil {
-		log.Print(err.Error())
+		if err.Error() == "unexpected status: 401 Unauthorized" {
+			http.Redirect(w, r, "/unauthorized", http.StatusSeeOther)
+		}
+		log.Printf("[%s] ERROR - %v", shared.GetCallerInfo(), err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -433,7 +436,8 @@ func (app *application) loginProcess(w http.ResponseWriter, r *http.Request) {
 
 	authenticated, errorCode := app.managSysModel.RequestAuth(userAuth)
 	if errorCode != http.StatusOK {
-		http.Error(w, "Authentication failed: invalid user credentials", http.StatusUnauthorized)
+		log.Printf("[%s] Authentication failed for user %s", shared.GetCallerInfo(), email)
+		http.Redirect(w, r, "/unauthorized", http.StatusTemporaryRedirect)
 		return
 	}
 
@@ -443,5 +447,38 @@ func (app *application) loginProcess(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Error(w, "invalid credentials", http.StatusUnauthorized)
+	log.Printf("[%s] Authentication failed for user %s", shared.GetCallerInfo(), email)
+	http.Redirect(w, r, "/unauthorized", http.StatusTemporaryRedirect)
+	// http.Error(w, "invalid credentials", http.StatusUnauthorized)
+}
+
+func (app *application) getUnauthorizedHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		app.serveUnauthorizedPage(w, r)
+	default:
+		http.Error(w, "invalid requested method", http.StatusMethodNotAllowed)
+	}
+}
+
+func (app *application) serveUnauthorizedPage(w http.ResponseWriter, _ *http.Request) {
+	files := []string{
+		"./ui/html/base.html",
+		"./ui/html/pages/unauthorized.html",
+		"./ui/html/partials/nav.html",
+	}
+
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		log.Printf("[%s] ERROR - %v", shared.GetCallerInfo(), err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	err = ts.ExecuteTemplate(w, "base", nil)
+	if err != nil {
+		log.Printf("[%s] ERROR - %v", shared.GetCallerInfo(), err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 }

@@ -11,6 +11,7 @@ func (app *application) route() *http.ServeMux {
 
 	mux.Handle("/static/", http.StripPrefix("/static/", fileServer))
 	mux.HandleFunc("/login", app.loginHandler)
+	mux.HandleFunc("/unauthorized", app.getUnauthorizedHandler)
 	mux.HandleFunc("/", app.home)
 	mux.HandleFunc("/order/create", app.createOrder)
 	mux.HandleFunc("/orders/search", app.filteredOrdersView)

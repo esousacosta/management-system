@@ -55,6 +55,7 @@ func (managSysModel *ManagementSystemModel) GetAllParts() (*[]data.Part, error) 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		log.Printf("[%s] ERROR - %s", shared.GetCallerInfo(), http.StatusText(resp.StatusCode))
 		return nil, fmt.Errorf("unexpected status: %s", resp.Status)
 	}
 
