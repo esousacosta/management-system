@@ -5,6 +5,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"net/http/cookiejar"
 
 	"github.com/esousacosta/managementsystem/cmd/shared"
 	"github.com/esousacosta/managementsystem/internal/appmodel"
@@ -20,7 +21,19 @@ func main() {
 	ordersEndpoint := flag.String("ordersEndpoint", "https://localhost:4000/v1/orders", "Orders endpoint for accessing the management system web service")
 	authEndpoint := flag.String("authEndpoint", "https://localhost:4000/v1/auth", "Orders endpoint for accessing the management system web service")
 
-	app := application{managSysModel: appmodel.NewManagementSystemModel(*ordersEndpoint, *partsEndpoint, *authEndpoint)}
+	cookieJar, err := cookiejar.New(nil)
+	if err != nil {
+		log.Fatalf("[%s] ERROR - %v", shared.GetCallerInfo(), err)
+	}
+
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{RootCAs: shared.GetCertPool()},
+		},
+		Jar: cookieJar,
+	}
+
+	app := application{managSysModel: appmodel.NewManagementSystemModel(*ordersEndpoint, *partsEndpoint, *authEndpoint, client)}
 
 	cert, err := tls.LoadX509KeyPair("./cert/domain.crt", "./cert/private.key")
 	if err != nil {

@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/esousacosta/managementsystem/cmd/shared"
 	"github.com/esousacosta/managementsystem/internal/data"
@@ -431,26 +430,29 @@ func (app *application) loginProcess(w http.ResponseWriter, r *http.Request) {
 		Password: password,
 	}
 
-	responseCookies, authenticated, errorCode := app.managSysModel.RequestAuth(userAuth)
+	_, authenticated, errorCode := app.managSysModel.RequestAuth(userAuth, w)
 	if errorCode != http.StatusOK {
 		http.Error(w, "Authentication failed: invalid user credentials", http.StatusUnauthorized)
 		return
 	}
 
-	r.Header.Set("Cookie", responseCookies)
-	http.SetCookie(w, &http.Cookie{
-		Name:     "auth",
-		Value:    responseCookies,
-		Expires:  time.Now().Add(time.Minute * 30),
-		HttpOnly: true,
-		Secure:   true, // Use false for HTTP
-		SameSite: http.SameSiteStrictMode,
-		Path:     "/",
-	})
+	// log.Printf("received cookies in the reply: %s", responseCookies)
 
-	log.Printf("cookies after receiving auth confirmation from web server: %v", r.Header.Get("Cookie"))
+	// r.Header.Set("Cookie", responseCookies)
+	// http.SetCookie(w, &http.Cookie{
+	// 	Name:     "auth",
+	// 	Value:    responseCookies,
+	// 	Expires:  time.Now().Add(time.Minute * 30),
+	// 	HttpOnly: true,
+	// 	Secure:   true, // Use false for HTTP
+	// 	SameSite: http.SameSiteStrictMode,
+	// 	Path:     "/",
+	// })
+
+	log.Printf("Request header: %v", r.Header)
+	log.Printf("ResponseWriter header: %v", w.Header())
 	if authenticated {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Redirect(w, r, "/parts", http.StatusSeeOther)
 		return
 	}
 

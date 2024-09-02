@@ -2,7 +2,6 @@ package appmodel
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -19,6 +18,7 @@ type ManagementSystemModel struct {
 	PartsEndpoint  string
 	OrdersEndpoint string
 	AuthEndpoint   string
+	client         *http.Client
 }
 
 type PartsResponse struct {
@@ -37,21 +37,17 @@ type AuthResponse struct {
 	Authorized bool `json:"authenticated"`
 }
 
-func NewManagementSystemModel(ordersEndpoint string, partsEndpoint string, authEndpoint string) ManagementSystemModel {
+func NewManagementSystemModel(ordersEndpoint string, partsEndpoint string, authEndpoint string, client *http.Client) ManagementSystemModel {
 	return ManagementSystemModel{
 		PartsEndpoint:  partsEndpoint,
 		OrdersEndpoint: ordersEndpoint,
 		AuthEndpoint:   authEndpoint,
+		client:         client,
 	}
 }
 
 func (managSysModel *ManagementSystemModel) GetAllParts() (*[]data.Part, error) {
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{RootCAs: shared.GetCertPool()},
-		},
-	}
-	resp, err := client.Get(managSysModel.PartsEndpoint)
+	resp, err := managSysModel.client.Get(managSysModel.PartsEndpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -78,12 +74,7 @@ func (managSysModel *ManagementSystemModel) GetAllParts() (*[]data.Part, error) 
 }
 
 func (managSysModel *ManagementSystemModel) GetPart(partRef string) (*data.Part, error) {
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{RootCAs: shared.GetCertPool()},
-		},
-	}
-	resp, err := client.Get(managSysModel.PartsEndpoint + "/" + partRef)
+	resp, err := managSysModel.client.Get(managSysModel.PartsEndpoint + "/" + partRef)
 	if err != nil {
 		return nil, fmt.Errorf("part with reference %s not found", partRef)
 	}
@@ -110,11 +101,6 @@ func (managSysModel *ManagementSystemModel) GetPart(partRef string) (*data.Part,
 }
 
 func (managSysModel *ManagementSystemModel) PostPart(part *data.Part) errorCode {
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{RootCAs: shared.GetCertPool()},
-		},
-	}
 	data, err := json.Marshal(part)
 	if err != nil {
 		log.Print(err)
@@ -128,7 +114,7 @@ func (managSysModel *ManagementSystemModel) PostPart(part *data.Part) errorCode 
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := client.Do(req)
+	resp, err := managSysModel.client.Do(req)
 	if err != nil {
 		log.Print(err)
 		return http.StatusInternalServerError
@@ -145,12 +131,7 @@ func (managSysModel *ManagementSystemModel) PostPart(part *data.Part) errorCode 
 }
 
 func (managSysModel *ManagementSystemModel) GetAllOrders() (*[]data.Order, error) {
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{RootCAs: shared.GetCertPool()},
-		},
-	}
-	resp, err := client.Get(managSysModel.OrdersEndpoint)
+	resp, err := managSysModel.client.Get(managSysModel.OrdersEndpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -177,12 +158,7 @@ func (managSysModel *ManagementSystemModel) GetAllOrders() (*[]data.Order, error
 }
 
 func (managSysModel *ManagementSystemModel) GetOrdersByClientId(clientId string) ([]data.Order, error) {
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{RootCAs: shared.GetCertPool()},
-		},
-	}
-	resp, err := client.Get(managSysModel.OrdersEndpoint + "/search?clientid=" + clientId)
+	resp, err := managSysModel.client.Get(managSysModel.OrdersEndpoint + "/search?clientid=" + clientId)
 	if err != nil {
 		return nil, fmt.Errorf("order with client ID %s not found", clientId)
 	}
@@ -209,11 +185,6 @@ func (managSysModel *ManagementSystemModel) GetOrdersByClientId(clientId string)
 }
 
 func (managSysModel *ManagementSystemModel) PostOrder(order *data.Order) errorCode {
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{RootCAs: shared.GetCertPool()},
-		},
-	}
 	data, err := json.Marshal(order)
 	if err != nil {
 		log.Print(err)
@@ -227,7 +198,7 @@ func (managSysModel *ManagementSystemModel) PostOrder(order *data.Order) errorCo
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := client.Do(req)
+	resp, err := managSysModel.client.Do(req)
 	if err != nil {
 		log.Print(err)
 		return http.StatusInternalServerError
@@ -243,13 +214,7 @@ func (managSysModel *ManagementSystemModel) PostOrder(order *data.Order) errorCo
 	return http.StatusCreated
 }
 
-func (managSysModel *ManagementSystemModel) RequestAuth(userAuth data.UserAuth) (string, bool, errorCode) {
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{RootCAs: shared.GetCertPool()},
-		},
-	}
-
+func (managSysModel *ManagementSystemModel) RequestAuth(userAuth data.UserAuth, w http.ResponseWriter) (string, bool, errorCode) {
 	data, err := json.Marshal(userAuth)
 	if err != nil {
 		log.Printf("[ERROR] - %s", err.Error())
@@ -262,7 +227,7 @@ func (managSysModel *ManagementSystemModel) RequestAuth(userAuth data.UserAuth) 
 		return "", false, http.StatusInternalServerError
 	}
 
-	resp, err := client.Do(req)
+	resp, err := managSysModel.client.Do(req)
 	if err != nil {
 		log.Printf("[ERROR] - %s", err.Error())
 		return "", false, http.StatusInternalServerError
@@ -277,7 +242,13 @@ func (managSysModel *ManagementSystemModel) RequestAuth(userAuth data.UserAuth) 
 	}
 
 	respCookies := resp.Header.Get("Set-Cookie")
-	log.Printf("auth response header: %v", respCookies)
+	for key, valueGroup := range resp.Header {
+		for _, value := range valueGroup {
+			w.Header().Add(key, value)
+		}
+	}
+	log.Printf("auth response headers: %v", w.Header())
+	// w.Header().Set("Set-Cookie", respCookies)
 
 	var authResponse AuthResponse
 	err = json.Unmarshal(data, &authResponse)

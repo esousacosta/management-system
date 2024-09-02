@@ -104,19 +104,29 @@ func (app *application) processUserAuth(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// CORS setup
+	w.Header().Set("Access-Control-Allow-Origin", "https://localhost:3000/")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+
 	cookieExpirationTime := time.Now().Add(time.Minute * 30)
-	cookie := http.Cookie{
+	cookie := &http.Cookie{
 		Name:     "auth",
 		Value:    signedToken,
 		Expires:  cookieExpirationTime,
 		HttpOnly: true,
 		Secure:   true,
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteNoneMode,
 		Path:     "/",
-		Domain:   "127.0.0.1",
 	}
 
-	http.SetCookie(w, &cookie)
+	http.SetCookie(w, cookie)
+
+	// origin := r.Header.Get("Origin")
+	app.logger.Printf("[SERVER] Received request headers: %v", r.Header)
+	// headers := make(http.Header)
+	// headers["Access-Control-Allow-Origin"] = []string{"https://localhost:3000"}
+	// headers["Access-Control-Allow-Credentials"] = []string{"true"}
+	// headers["Set-Cookie"] = []string{signedToken}
 
 	err = writeJson(w, http.StatusOK, envelope{"authenticated": true}, nil)
 	if err != nil {

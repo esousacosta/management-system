@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/esousacosta/managementsystem/cmd/shared"
@@ -15,6 +16,8 @@ func (app *application) validateSession(finalHandler http.HandlerFunc) http.Hand
 			http.Error(w, "authentication failed. Please log in", http.StatusUnauthorized)
 			return
 		}
+
+		log.Printf("Received cookis during validation: %v", cookie.Value)
 
 		_, _ = jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
 			claims, ok := token.Claims.(jwt.RegisteredClaims)
