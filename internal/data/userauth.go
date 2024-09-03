@@ -36,7 +36,7 @@ func (um *UserAuthModel) GetUserAuth(email string) (*UserAuth, error) {
 
 	var user UserAuth
 
-	err := um.db.QueryRow(query, email).Scan(&user.Email, &user.Password, &user.CreatedAt, &user.ID, &user.JwtSecret)
+	err := um.db.QueryRow(query, email).Scan(&user.ID, &user.CreatedAt, &user.Email, &user.Password, &user.JwtSecret)
 	if err != nil {
 		log.Printf("[%s] get user_auth info query error --> %s", shared.GetCallerInfo(), err.Error())
 		return nil, fmt.Errorf("error fetching user information from the database")

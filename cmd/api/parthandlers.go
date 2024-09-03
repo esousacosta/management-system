@@ -32,22 +32,24 @@ func (app *application) getCreatePartsHandler(w http.ResponseWriter, r *http.Req
 			return
 		}
 	case r.Method == http.MethodPost:
-		part, err := readPartJson(w, r, app.logger)
+		readPart, err := readPartJson(w, r, app.logger)
 		if err != nil {
 			app.logger.Printf("request decoding error --> %v", err)
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 			return
 		}
 
-		err = app.model.Parts.Insert(part)
+		err = app.model.Parts.Insert(readPart)
 		if err != nil {
 			app.logger.Printf("insertion error --> %v", err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 
+		part := createPartFromReadPart(readPart)
+
 		headers := make(http.Header)
-		headers.Set("Location", "/v1/parts/"+strconv.Itoa(part.Id))
+		headers.Set("Location", "/v1/parts/"+strconv.Itoa(readPart.Id))
 
 		if err := writeJson(w, http.StatusCreated, envelope{"part": part}, headers); err != nil {
 			app.logger.Printf("response writing error --> %v", err)
@@ -110,6 +112,10 @@ func (app *application) updatePart(w http.ResponseWriter, r *http.Request) {
 
 	if receivedPart.Price != nil {
 		part.Price = *receivedPart.Price
+	}
+
+	if receivedPart.Stock != nil {
+		part.Stock = *receivedPart.Stock
 	}
 
 	if receivedPart.Reference != nil {

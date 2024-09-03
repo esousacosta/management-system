@@ -120,3 +120,32 @@ func readUserAuthJson(w http.ResponseWriter, r *http.Request, logger *log.Logger
 
 	return &input, nil
 }
+
+func createPartFromReadPart(readPart *data.ReadPart) *data.Part {
+	var part data.Part
+	if readPart.Name != nil {
+		part.Name = *readPart.Name
+	}
+
+	if readPart.Price != nil {
+		part.Price = *readPart.Price
+	}
+
+	if readPart.Stock != nil {
+		part.Stock = *readPart.Stock
+	}
+
+	if readPart.Reference != nil {
+		part.Reference = *readPart.Reference
+	}
+
+	if readPart.Barcode != nil {
+		part.Barcode = *readPart.Barcode
+	}
+
+	if readPart.UserId != nil {
+		part.UserId = *readPart.UserId
+	}
+
+	return &part
+}

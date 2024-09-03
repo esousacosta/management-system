@@ -1,0 +1,37 @@
+CREATE TABLE IF NOT EXISTS user_auth (
+id bigserial PRIMARY KEY,
+created_at timestamp(0) with time zone NOT NULL DEFAULT NOW(),
+email text NOT NULL,
+password text NOT NULL,
+jwt_secret text NOT NULL);
+
+
+CREATE TABLE IF NOT EXISTS clients (
+id bigserial PRIMARY KEY,
+created_at timestamp(0) with time zone NOT NULL DEFAULT NOW(),
+name text NOT NULL,
+lastname text NOT NULL,
+email text NOT NULL,
+phone text NOT NULL,
+ref text NOT NULL,
+user_id bigint NOT NULL REFERENCE user_auth(id));
+
+CREATE TABLE IF NOT EXISTS parts (
+id bigserial PRIMARY KEY,
+created_at timestamp(0) with time zone NOT NULL DEFAULT NOW(),
+name text NOT NULL,
+price real NOT NULL,
+stock int NOT NULL,
+ref text NOT NULL UNIQUE,
+barcode text NOT NULL UNIQUE,
+user_id bigint NOT NULL REFERENCE user_auth(id));
+
+CREATE TABLE IF NOT EXISTS orders (
+id bigserial PRIMARY KEY,
+created_at timestamp(0) with time zone NOT NULL DEFAULT NOW(),
+services text[] NOT NULL,
+parts_refs text[] NOT NULL,
+comment text NOT NULL,
+total real NOT NULL,
+client_id bigint NOT NULL REFERENCE clients(id),
+user_id bigint NOT NULL REFERENCE user_auth(id));
