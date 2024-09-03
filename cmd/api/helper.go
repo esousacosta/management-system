@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/esousacosta/managementsystem/cmd/shared"
 	"github.com/esousacosta/managementsystem/internal/data"
 	_ "github.com/lib/pq"
 )
@@ -59,14 +58,14 @@ func writeJson(w http.ResponseWriter, statusCode int, data envelope, headers htt
 	return err
 }
 
-func readPartJson(w http.ResponseWriter, r *http.Request, logger *log.Logger) (*data.ReadPart, error) {
+func readJson[V any](w http.ResponseWriter, r *http.Request, logger *log.Logger) (*V, error) {
 	maxBytes := 1_048_576
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
 
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
 
-	var input data.ReadPart
+	var input V
 	if err := dec.Decode(&input); err != nil {
 		logger.Printf("decoding error --> %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -78,69 +77,6 @@ func readPartJson(w http.ResponseWriter, r *http.Request, logger *log.Logger) (*
 	}
 
 	return &input, nil
-}
-
-func readOrderJson(w http.ResponseWriter, r *http.Request, logger *log.Logger) (*data.ReadOrder, error) {
-	maxBytes := 1_048_576
-	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
-
-	dec := json.NewDecoder(r.Body)
-	dec.DisallowUnknownFields()
-
-	var input data.ReadOrder
-	if err := dec.Decode(&input); err != nil {
-		logger.Printf("decoding error --> %v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return nil, err
-	}
-
-	if err := dec.Decode(&struct{}{}); err != io.EOF {
-		return nil, errors.New("body must contain only one JSON object")
-	}
-
-	return &input, nil
-}
-
-func readUserAuthJson(w http.ResponseWriter, r *http.Request, logger *log.Logger) (*data.ReadUserAuth, error) {
-	maxBytes := 1_048_576
-	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
-
-	dec := json.NewDecoder(r.Body)
-	dec.DisallowUnknownFields()
-
-	var input data.ReadUserAuth
-	if err := dec.Decode(&input); err != nil || input.Email == nil || input.Password == nil {
-		logger.Printf("decoding error --> %v", err)
-		http.Error(w, "user auth query decoding error", http.StatusInternalServerError)
-		return nil, err
-	}
-
-	if err := dec.Decode(&struct{}{}); err != io.EOF {
-		return nil, errors.New("body must contain only one JSON object")
-	}
-
-	return &input, nil
-}
-
-func readClientJson(w http.ResponseWriter, r *http.Request, logger *log.Logger) (*data.ReadClient, error) {
-	maxBytes := 1_048_576
-	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
-
-	dec := json.NewDecoder(r.Body)
-	dec.DisallowUnknownFields()
-
-	var client data.ReadClient
-	if err := dec.Decode(&client); err != nil || client.Name == nil {
-		logger.Printf("[%s] decoding error --> %v", shared.GetCallerInfo(), err)
-		http.Error(w, "user auth query decoding error", http.StatusInternalServerError)
-		return nil, err
-	}
-
-	if err := dec.Decode(&struct{}{}); err != io.EOF {
-		return nil, errors.New("body must contain only one JSON object")
-	}
-
-	return &client, nil
 }
 
 func createPartFromReadPart(readPart *data.ReadPart) *data.Part {

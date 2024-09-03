@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/esousacosta/managementsystem/cmd/shared"
+	"github.com/esousacosta/managementsystem/internal/data"
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -33,7 +34,7 @@ func (app *application) getCreateClientsHandler(w http.ResponseWriter, r *http.R
 }
 
 func (app *application) createClient(w http.ResponseWriter, r *http.Request) {
-	readClient, err := readClientJson(w, r, app.logger)
+	readClient, err := readJson[data.ReadClient](w, r, app.logger)
 	if err != nil {
 		app.logger.Printf("[%s] ERROR - %v", shared.GetCallerInfo(), err)
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)

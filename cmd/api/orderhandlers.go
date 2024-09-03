@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/esousacosta/managementsystem/cmd/shared"
+	"github.com/esousacosta/managementsystem/internal/data"
 )
 
 func (app *application) getCreateOrdersHandler(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +25,7 @@ func (app *application) getCreateOrdersHandler(w http.ResponseWriter, r *http.Re
 		}
 		return
 	case http.MethodPost:
-		order, err := readOrderJson(w, r, app.logger)
+		order, err := readJson[data.ReadOrder](w, r, app.logger)
 		if err != nil {
 			app.logger.Print(err.Error())
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
@@ -90,7 +91,7 @@ func (app *application) getUpdateDeleteOrdersHandler(w http.ResponseWriter, r *h
 			return
 		}
 
-		receivedOrder, err := readOrderJson(w, r, app.logger)
+		receivedOrder, err := readJson[data.ReadOrder](w, r, app.logger)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 			return

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/esousacosta/managementsystem/cmd/shared"
+	"github.com/esousacosta/managementsystem/internal/data"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -18,7 +19,7 @@ func (app *application) postCreateAuthenticationHandler(w http.ResponseWriter, r
 }
 
 func (app *application) createUserAuth(w http.ResponseWriter, r *http.Request) {
-	userAuth, err := readUserAuthJson(w, r, app.logger)
+	userAuth, err := readJson[data.ReadUserAuth](w, r, app.logger)
 	if err != nil {
 		app.logger.Print("[ERROR] couldn't parse the received request's body")
 		http.Error(w, "couldn't parse the received form", http.StatusBadRequest)
@@ -64,7 +65,7 @@ func (app *application) postRequestAuthenticationHandler(w http.ResponseWriter, 
 }
 
 func (app *application) processUserAuth(w http.ResponseWriter, r *http.Request) {
-	userAuth, err := readUserAuthJson(w, r, app.logger)
+	userAuth, err := readJson[data.ReadUserAuth](w, r, app.logger)
 	if err != nil {
 		app.logger.Print("[ERROR] couldn't parse the received request's body")
 		http.Error(w, "couldn't parse the received form", http.StatusBadRequest)

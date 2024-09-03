@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/esousacosta/managementsystem/cmd/shared"
+	"github.com/esousacosta/managementsystem/internal/data"
 )
 
 func (app *application) healthcheck(w http.ResponseWriter, r *http.Request) {
@@ -32,7 +33,7 @@ func (app *application) getCreatePartsHandler(w http.ResponseWriter, r *http.Req
 			return
 		}
 	case r.Method == http.MethodPost:
-		readPart, err := readPartJson(w, r, app.logger)
+		readPart, err := readJson[data.ReadPart](w, r, app.logger)
 		if err != nil {
 			app.logger.Printf("request decoding error --> %v", err)
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
@@ -99,7 +100,7 @@ func (app *application) updatePart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	receivedPart, err := readPartJson(w, r, app.logger)
+	receivedPart, err := readJson[data.ReadPart](w, r, app.logger)
 	if err != nil {
 		app.logger.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
