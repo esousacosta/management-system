@@ -3,6 +3,7 @@ package data
 import "database/sql"
 
 type Models struct {
+	Clients   ClientModel
 	Parts     PartModel
 	Orders    OrderModel
 	UsersAuth UserAuthModel
@@ -10,6 +11,9 @@ type Models struct {
 
 func NewModel(db *sql.DB) *Models {
 	return &Models{
+		Clients: ClientModel{
+			db: db,
+		},
 		Parts: PartModel{
 			db: db,
 		},

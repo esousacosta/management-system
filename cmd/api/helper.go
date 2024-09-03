@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/esousacosta/managementsystem/cmd/shared"
 	"github.com/esousacosta/managementsystem/internal/data"
 	_ "github.com/lib/pq"
 )
@@ -119,6 +120,27 @@ func readUserAuthJson(w http.ResponseWriter, r *http.Request, logger *log.Logger
 	}
 
 	return &input, nil
+}
+
+func readClientJson(w http.ResponseWriter, r *http.Request, logger *log.Logger) (*data.ReadClient, error) {
+	maxBytes := 1_048_576
+	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
+
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+
+	var client data.ReadClient
+	if err := dec.Decode(&client); err != nil || client.Name == nil || client.Email == nil {
+		logger.Printf("[%s] decoding error --> %v", shared.GetCallerInfo(), err)
+		http.Error(w, "user auth query decoding error", http.StatusInternalServerError)
+		return nil, err
+	}
+
+	if err := dec.Decode(&struct{}{}); err != io.EOF {
+		return nil, errors.New("body must contain only one JSON object")
+	}
+
+	return &client, nil
 }
 
 func createPartFromReadPart(readPart *data.ReadPart) *data.Part {
