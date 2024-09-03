@@ -83,7 +83,7 @@ func (cm *ClientModel) Insert(client *ReadClient, userId int) error {
 				VALUES ($1, $2, $3, $4, $5, $6)
 				RETURNING id, created_at`
 
-	args := []interface{}{client.Name, client.LastName, client.Email, client.Phone, client.Reference, client.UserId}
+	args := []interface{}{client.Name, client.LastName, client.Email, client.Phone, client.Reference, userId}
 
 	return cm.db.QueryRow(query, args...).Scan(&client.Id, &client.CreatedAt)
 }
