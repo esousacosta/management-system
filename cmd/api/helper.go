@@ -130,7 +130,7 @@ func readClientJson(w http.ResponseWriter, r *http.Request, logger *log.Logger) 
 	dec.DisallowUnknownFields()
 
 	var client data.ReadClient
-	if err := dec.Decode(&client); err != nil || client.Name == nil || client.Email == nil {
+	if err := dec.Decode(&client); err != nil || client.Name == nil {
 		logger.Printf("[%s] decoding error --> %v", shared.GetCallerInfo(), err)
 		http.Error(w, "user auth query decoding error", http.StatusInternalServerError)
 		return nil, err

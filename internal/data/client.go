@@ -77,3 +77,13 @@ func (cm *ClientModel) GetClientById(clientId int) (*Client, error) {
 
 	return &client, nil
 }
+
+func (cm *ClientModel) Insert(client *ReadClient, userId int) error {
+	query := `INSERT INTO clients (name, lastname, email, phone, reference, user_id)
+				VALUES ($1, $2, $3, $4, $5, $6)
+				RETURNING id, created_at`
+
+	args := []interface{}{client.Name, client.LastName, client.Email, client.Phone, client.Reference, client.UserId}
+
+	return cm.db.QueryRow(query, args...).Scan(&client.Id, &client.CreatedAt)
+}
