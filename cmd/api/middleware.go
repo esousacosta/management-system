@@ -25,7 +25,7 @@ func (app *application) validateSession(finalHandler http.HandlerFunc) http.Hand
 		}
 
 		token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
-			userEmail, err := shared.GetValueFromKeyOnJwtTokenClaims(token, "id")
+			userEmail, err := shared.GetValueFromKeyOnJwtTokenClaims(token, "email")
 			if err != nil {
 				return nil, fmt.Errorf("[%s] ERROR - No valid user email in JWT Token claims", shared.GetCallerInfo())
 			}

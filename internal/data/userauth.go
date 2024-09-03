@@ -10,7 +10,7 @@ import (
 )
 
 type UserAuth struct {
-	ID        int64     `json:"-"`
+	Id        int       `json:"-"`
 	CreatedAt time.Time `json:"-"`
 	Email     string    `json:"email"`
 	Password  string    `json:"password"`
@@ -18,7 +18,7 @@ type UserAuth struct {
 }
 
 type ReadUserAuth struct {
-	ID        int64     `json:"-"`
+	Id        int       `json:"-"`
 	CreatedAt time.Time `json:"-"`
 	Email     *string   `json:"email"`
 	Password  *string   `json:"password"`
@@ -36,7 +36,7 @@ func (um *UserAuthModel) GetUserAuth(email string) (*UserAuth, error) {
 
 	var user UserAuth
 
-	err := um.db.QueryRow(query, email).Scan(&user.ID, &user.CreatedAt, &user.Email, &user.Password, &user.JwtSecret)
+	err := um.db.QueryRow(query, email).Scan(&user.Id, &user.CreatedAt, &user.Email, &user.Password, &user.JwtSecret)
 	if err != nil {
 		log.Printf("[%s] get user_auth info query error --> %s", shared.GetCallerInfo(), err.Error())
 		return nil, fmt.Errorf("error fetching user information from the database")
@@ -52,7 +52,7 @@ func (um *UserAuthModel) InsertUser(userAuth *ReadUserAuth) error {
 
 	args := []any{*userAuth.Email, *userAuth.Password, *userAuth.JwtSecret}
 
-	err := um.db.QueryRow(query, args...).Scan(&userAuth.ID, &userAuth.CreatedAt)
+	err := um.db.QueryRow(query, args...).Scan(&userAuth.Id, &userAuth.CreatedAt)
 	if err != nil {
 		log.Print("user auth insert error --> " + err.Error())
 		return fmt.Errorf("error creating user auth information in the database")

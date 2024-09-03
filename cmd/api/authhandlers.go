@@ -89,7 +89,7 @@ func (app *application) processUserAuth(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Set JWT Token on the response cookie
-	unsignedToken, err := shared.GenerateUnsignedJwtToken(user.Email)
+	unsignedToken, err := shared.GenerateUnsignedJwtToken(user.Email, user.Id)
 	if err != nil {
 		app.logger.Printf("[%s] ERROR - %v", shared.GetCallerInfo(), err)
 		http.Error(w, "error generating authentication token", http.StatusInternalServerError)

@@ -46,13 +46,14 @@ func HashPassword(password string) (string, error) {
 	return string(hashedPasswordBytes), err
 }
 
-func GenerateUnsignedJwtToken(userEmail string) (*jwt.Token, error) {
+func GenerateUnsignedJwtToken(userEmail string, userId int) (*jwt.Token, error) {
 	// 30m expiration for non-sensitive applications - OWASP
 	tokenExpirationTime := time.Now().Add(time.Minute * 30)
 
 	claims := jwt.MapClaims{
-		"id":  userEmail,
-		"exp": jwt.NewNumericDate(tokenExpirationTime),
+		"email": userEmail,
+		"id":    userId,
+		"exp":   jwt.NewNumericDate(tokenExpirationTime),
 	}
 
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims), nil

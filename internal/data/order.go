@@ -13,7 +13,7 @@ type OrderModel struct {
 }
 
 type Order struct {
-	ID        int       `json:"-"`
+	Id        int       `json:"-"`
 	ClientId  string    `json:"client_id"`
 	CreatedAt time.Time `json:"created_at"`
 	Services  []string  `json:"services"`
@@ -49,7 +49,7 @@ func (om *OrderModel) GetAll() ([]*Order, error) {
 
 	for rows.Next() {
 		var order Order
-		if err := rows.Scan(&order.ID, &order.ClientId, &order.CreatedAt, pq.Array(&order.Services), pq.Array(&order.PartsRefs), &order.Comment, &order.Total); err != nil {
+		if err := rows.Scan(&order.Id, &order.ClientId, &order.CreatedAt, pq.Array(&order.Services), pq.Array(&order.PartsRefs), &order.Comment, &order.Total); err != nil {
 			log.Print("scan error: ")
 			return nil, err
 		}
@@ -66,7 +66,7 @@ func (om *OrderModel) Get(orderId int64) (*Order, error) {
 
 	var order Order
 
-	err := om.db.QueryRow(query, orderId).Scan(&order.ID, &order.ClientId, &order.CreatedAt, pq.Array(&order.Services), pq.Array(&order.PartsRefs), &order.Comment, &order.Total)
+	err := om.db.QueryRow(query, orderId).Scan(&order.Id, &order.ClientId, &order.CreatedAt, pq.Array(&order.Services), pq.Array(&order.PartsRefs), &order.Comment, &order.Total)
 	if err != nil {
 		log.Printf("query error: %v", err)
 		return nil, err
@@ -92,7 +92,7 @@ func (om *OrderModel) GetByClientId(clientId string) ([]Order, error) {
 
 	for rows.Next() {
 		var order Order
-		err := rows.Scan(&order.ID, &order.ClientId, &order.CreatedAt, pq.Array(&order.Services), pq.Array(&order.PartsRefs), &order.Comment, &order.Total)
+		err := rows.Scan(&order.Id, &order.ClientId, &order.CreatedAt, pq.Array(&order.Services), pq.Array(&order.PartsRefs), &order.Comment, &order.Total)
 		if err != nil {
 			log.Print("scan error: ")
 			return nil, err
@@ -129,7 +129,7 @@ func (om *OrderModel) Update(order *Order) error {
 				WHERE id = $6
 				RETURNING client_id`
 
-	args := []any{order.ClientId, pq.Array(&order.Services), pq.Array(order.PartsRefs), order.Comment, order.Total, order.ID}
+	args := []any{order.ClientId, pq.Array(&order.Services), pq.Array(order.PartsRefs), order.Comment, order.Total, order.Id}
 	result, err := om.db.Exec(query, args...)
 	if err != nil {
 		log.Printf("error updating entry in orders db: %v", err)
@@ -137,7 +137,7 @@ func (om *OrderModel) Update(order *Order) error {
 	}
 
 	if nbRowsAffected, err := result.RowsAffected(); nbRowsAffected == 0 || err != nil {
-		log.Printf("no orders updated for id %d", order.ID)
+		log.Printf("no orders updated for id %d", order.Id)
 		return err
 	}
 
